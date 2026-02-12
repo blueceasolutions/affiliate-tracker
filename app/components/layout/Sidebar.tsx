@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
-export function Sidebar() {
+export function SidebarContent() {
   const { role } = useAuth()
   const location = useLocation()
 
@@ -66,6 +66,14 @@ export function Sidebar() {
       <div className='border-t border-slate-200 p-4'>
         {/* Footer or extra links could go here */}
       </div>
+    </div>
+  )
+}
+
+export function Sidebar() {
+  return (
+    <div className='hidden md:flex h-full'>
+      <SidebarContent />
     </div>
   )
 }
