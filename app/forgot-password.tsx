@@ -3,10 +3,10 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Link } from 'react-router'
-import { supabase } from '../../lib/supabase'
-import { Button } from '../../components/ui/button'
-import { Input } from '../../components/ui/input'
-import { AuthLayout } from '../../components/auth/AuthLayout'
+import { supabase } from './lib/supabase'
+import { Button } from './components/ui/button'
+import { Input } from './components/ui/input'
+import { AuthLayout } from './components/auth/AuthLayout'
 
 const forgotPasswordSchema = z.object({
   email: z.string().email('Invalid email address'),

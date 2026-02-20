@@ -3,10 +3,10 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useNavigate } from 'react-router'
-import { supabase } from '../../lib/supabase'
-import { Button } from '../../components/ui/button'
-import { Input } from '../../components/ui/input'
-import { AuthLayout } from '../../components/auth/AuthLayout'
+import { supabase } from './lib/supabase'
+import { Button } from './components/ui/button'
+import { Input } from './components/ui/input'
+import { AuthLayout } from './components/auth/AuthLayout'
 
 const resetPasswordSchema = z
   .object({

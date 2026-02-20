@@ -6,11 +6,13 @@ import {
 } from '@react-router/dev/routes'
 
 export default [
-  // index('routes/home.tsx'),
-  index('routes/auth/login.tsx'),
-  route('signup', 'routes/auth/signup.tsx'),
-  route('forgot-password', 'routes/auth/forgot-password.tsx'),
-  route('reset-password', 'routes/auth/reset-password.tsx'),
+  // Public / Auth Routes
+  index('home.tsx'),
+  route('signup', 'signup.tsx'),
+  route('forgot-password', 'forgot-password.tsx'),
+  route('reset-password', 'reset-password.tsx'),
+
+  // App / API Routes
   route('ref/:code', 'routes/ref.tsx'),
   route('api/webhooks/paystack', 'routes/api/webhooks.paystack.tsx'),
 

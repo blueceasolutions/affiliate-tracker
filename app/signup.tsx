@@ -3,12 +3,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Link, useNavigate } from 'react-router'
-import { supabase } from '../../lib/supabase'
-import { Button } from '../../components/ui/button'
-import { Input } from '../../components/ui/input'
-import { AuthLayout } from '../../components/auth/AuthLayout'
-import { GoogleSignInButton } from '../../components/auth/GoogleSignInButton'
-import { FormDivider } from '../../components/auth/FormDivider'
+import { supabase } from './lib/supabase'
+import { Button } from './components/ui/button'
+import { Input } from './components/ui/input'
+import { AuthLayout } from './components/auth/AuthLayout'
+import { GoogleSignInButton } from './components/auth/GoogleSignInButton'
+import { FormDivider } from './components/auth/FormDivider'
 
 const signupSchema = z
   .object({
