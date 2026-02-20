@@ -1,56 +1,62 @@
-import { useEffect, useState } from 'react'
-import { useParams } from 'react-router'
-import { trackClick } from '../lib/api'
+import { redirect } from 'react-router'
+import type { Route } from './+types/ref'
+import { supabase } from '../lib/supabase'
 
-export default function RefRoute() {
-  const { code } = useParams()
-  const [error, setError] = useState<string | null>(null)
+export async function loader({ request, params }: Route.LoaderArgs) {
+  const { code } = params
+  if (!code) throw new Response('Not Found', { status: 404 })
 
-  useEffect(() => {
-    if (!code) return
+  // 1. Fetch link & product info
+  const { data: link, error } = await supabase
+    .from('affiliate_links')
+    .select('id, product:products(url)')
+    .eq('unique_code', code)
+    .single()
 
-    const handleTracking = async () => {
-      try {
-        const link = await trackClick(code)
-
-        // Store in localStorage for conversion tracking later
-        // In a real app, this should probably be a cookie with an expiry
-        localStorage.setItem('bluecea_affiliate_link_id', link.id)
-
-        // Redirect to product URL
-        // If product URL is external, use window.location.href
-        // If it's internal (e.g. testing), we can use navigate
-        // Assuming external for now or relative
-        const url = link.product?.url || '/'
-
-        // Delay slightly or just redirect
-        window.location.href = url
-      } catch (err) {
-        console.error('Tracking error:', err)
-        setError('Invalid link or product not found.')
-      }
-    }
-
-    handleTracking()
-  }, [code])
-
-  if (error) {
-    return (
-      <div className='flex h-screen items-center justify-center bg-slate-50'>
-        <div className='text-center'>
-          <h1 className='text-2xl font-bold text-slate-900'>Oops!</h1>
-          <p className='mt-2 text-slate-600'>{error}</p>
-        </div>
-      </div>
-    )
+  if (error || !link || !link.product) {
+    throw new Response('Invalid affiliate link', { status: 404 })
   }
 
-  return (
-    <div className='flex h-screen items-center justify-center bg-slate-50'>
-      <div className='flex flex-col items-center gap-4'>
-        <div className='h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600'></div>
-        <p className='text-sm text-slate-500'>Redirecting...</p>
-      </div>
-    </div>
+  // 2. Log the click
+  const ip =
+    request.headers.get('x-forwarded-for') ||
+    request.headers.get('x-real-ip') ||
+    'unknown'
+  const userAgent = request.headers.get('user-agent') || 'unknown'
+  const referer = request.headers.get('referer') || 'unknown'
+
+  await supabase.from('affiliate_clicks').insert([
+    {
+      affiliate_link_id: link.id,
+      ip_address: ip,
+      user_agent: userAgent,
+      referer: referer,
+    },
+  ])
+
+  // 3. Construct the product URL and append the ref code
+  // Handles cross-domain tracking by appending ?ref=UUID
+  // Supabase types might infer relation as array or single object
+  const productData = Array.isArray(link.product)
+    ? link.product[0]
+    : link.product
+  const productUrlStr =
+    typeof productData?.url === 'string' ? productData.url : ''
+  const productUrl = new URL(
+    productUrlStr.startsWith('http')
+      ? productUrlStr
+      : `https://${productUrlStr}`,
   )
+  productUrl.searchParams.set('ref', link.id)
+
+  // 4. Set Cookie and Redirect instantly
+  const headers = new Headers()
+  headers.append(
+    'Set-Cookie',
+    `bc_aff_id=${link.id}; Path=/; Max-Age=${60 * 60 * 24 * 30}; HttpOnly; Secure; SameSite=Lax`,
+  )
+
+  return redirect(productUrl.toString(), {
+    headers,
+  })
 }

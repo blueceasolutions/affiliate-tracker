@@ -12,6 +12,7 @@ export default [
   route('forgot-password', 'routes/auth/forgot-password.tsx'),
   route('reset-password', 'routes/auth/reset-password.tsx'),
   route('ref/:code', 'routes/ref.tsx'),
+  route('api/webhooks/paystack', 'routes/api/webhooks.paystack.tsx'),
 
   // Test Routes
   route('test/conversion', 'routes/test/conversion.tsx'),
