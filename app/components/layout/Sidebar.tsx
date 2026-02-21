@@ -128,7 +128,7 @@ export function SidebarContent() {
 
           {/* 3. Settings Link */}
           <Link
-            to='/settings'
+            to={role === 'admin' ? '/admin/settings' : '/affiliate/settings'}
             className={cn(
               'group flex items-center rounded-lg px-3 py-2.5 text-[15px] font-medium transition-colors',
               location.pathname === '/settings'
