@@ -160,7 +160,7 @@ export default function Signup() {
           <div>
             <label
               htmlFor='confirmPassword'
-              className='block text-sm font-medium text-slate-700 mb-1.5'>
+              className='block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5'>
               Confirm password
             </label>
             <Input

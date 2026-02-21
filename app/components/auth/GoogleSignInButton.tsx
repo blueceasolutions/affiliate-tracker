@@ -23,7 +23,7 @@ export function GoogleSignInButton({ redirectTo }: GoogleSignInButtonProps) {
     <button
       type='button'
       onClick={handleGoogleSignIn}
-      className='w-full flex items-center justify-center gap-3 h-11 rounded-lg border border-slate-200 bg-white text-slate-800 text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm'>
+      className='w-full flex items-center justify-center gap-3 h-11 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors shadow-sm'>
       {/* Google "G" logo */}
       <svg
         width='18'

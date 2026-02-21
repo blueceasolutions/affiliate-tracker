@@ -40,18 +40,18 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         ref={overlayRef}
       />
 
-      <div className='relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
-        <div className='bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4'>
+      <div className='relative transform overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
+        <div className='bg-white dark:bg-slate-900 px-4 pb-4 pt-5 sm:p-6 sm:pb-4'>
           <div className='flex items-center justify-between mb-4'>
             <h3
-              className='text-lg font-semibold leading-6 text-slate-900'
+              className='text-lg font-semibold leading-6 text-slate-900 dark:text-slate-50'
               id='modal-title'>
               {title}
             </h3>
             <div className='ml-3 flex h-7 items-center'>
               <button
                 type='button'
-                className='relative rounded-md bg-white text-slate-400 hover:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+                className='relative rounded-md bg-white dark:bg-slate-900 text-slate-400 hover:text-slate-500 dark:hover:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900'
                 onClick={onClose}>
                 <span className='sr-only'>Close</span>
                 <X className='h-6 w-6' aria-hidden='true' />

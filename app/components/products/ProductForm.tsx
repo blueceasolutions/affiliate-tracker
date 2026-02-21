@@ -72,7 +72,7 @@ export function ProductForm({
       <div>
         <label
           htmlFor='name'
-          className='block text-sm font-medium text-slate-700'>
+          className='block text-sm font-medium text-slate-700 dark:text-slate-300'>
           Product Name
         </label>
         <Input
@@ -89,13 +89,13 @@ export function ProductForm({
       <div>
         <label
           htmlFor='description'
-          className='block text-sm font-medium text-slate-700'>
+          className='block text-sm font-medium text-slate-700 dark:text-slate-300'>
           Description
         </label>
         <textarea
           id='description'
           rows={3}
-          className='flex w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+          className='flex w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 ring-offset-white dark:ring-offset-slate-950 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
           placeholder='Product details...'
           {...register('description')}
         />
@@ -109,7 +109,7 @@ export function ProductForm({
       <div>
         <label
           htmlFor='url'
-          className='block text-sm font-medium text-slate-700'>
+          className='block text-sm font-medium text-slate-700 dark:text-slate-300'>
           Product URL
         </label>
         <Input
@@ -127,7 +127,7 @@ export function ProductForm({
       <div>
         <label
           htmlFor='payout'
-          className='block text-sm font-medium text-slate-700'>
+          className='block text-sm font-medium text-slate-700 dark:text-slate-300'>
           Payout per Conversion ($)
         </label>
         <Input
@@ -154,12 +154,12 @@ export function ProductForm({
         />
         <label
           htmlFor='is_affiliate_enabled'
-          className='text-sm font-medium text-slate-700'>
+          className='text-sm font-medium text-slate-700 dark:text-slate-300'>
           Enable for Affiliates
         </label>
       </div>
 
-      <div className='flex justify-end gap-3 pt-4 border-t border-slate-100'>
+      <div className='flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800'>
         <Button
           type='button'
           variant='ghost'

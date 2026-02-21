@@ -96,7 +96,7 @@ export default function ResetPassword() {
           <div>
             <label
               htmlFor='confirmPassword'
-              className='block text-sm font-medium text-slate-700 mb-1.5'>
+              className='block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5'>
               Confirm new password
             </label>
             <Input

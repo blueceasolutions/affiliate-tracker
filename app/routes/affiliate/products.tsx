@@ -8,20 +8,42 @@ import {
   generateAffiliateLink,
 } from '../../lib/api'
 import type { Product } from '../../types'
+import { useAuth } from '../../context/AuthContext'
+import { Ban } from 'lucide-react'
 
 export default function AffiliateProducts() {
+  const { status } = useAuth()
+
   const { data: products = [], isLoading } = useQuery({
     queryKey: ['affiliate-products'],
     queryFn: getAffiliateProducts,
   })
 
+  if (status !== 'active') {
+    return (
+      <div className='flex h-full flex-col items-center justify-center space-y-4 p-8 text-center'>
+        <div className='flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 text-yellow-600'>
+          <Ban className='h-8 w-8' />
+        </div>
+        <h2 className='text-2xl font-bold text-slate-900'>
+          Account Pending Approval
+        </h2>
+        <p className='text-slate-500 max-w-sm'>
+          You cannot access or promote products until an administrator has
+          reviewed and activated your affiliate account. You will be notified
+          once activated.
+        </p>
+      </div>
+    )
+  }
+
   return (
     <div className='space-y-6'>
       <div>
-        <h1 className='text-2xl font-bold tracking-tight text-slate-900'>
+        <h1 className='text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50'>
           Available Products
         </h1>
-        <p className='text-slate-500'>
+        <p className='text-slate-500 dark:text-slate-400'>
           Choose products to promote and start earning.
         </p>
       </div>
@@ -31,13 +53,13 @@ export default function AffiliateProducts() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className='h-48 animate-pulse rounded-xl bg-slate-100'
+              className='h-48 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800'
             />
           ))}
         </div>
       ) : products.length === 0 ? (
-        <div className='rounded-lg border border-dashed border-slate-300 p-8 text-center'>
-          <p className='text-slate-500'>
+        <div className='rounded-lg border border-dashed border-slate-300 dark:border-slate-700 p-8 text-center'>
+          <p className='text-slate-500 dark:text-slate-400'>
             No products available for promotion yet.
           </p>
         </div>
@@ -87,24 +109,30 @@ function ProductCard({ product }: { product: Product }) {
   const isLoading = generateMutation.isPending
 
   return (
-    <div className='flex flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-all hover:shadow-md'>
-      <h3 className='text-lg font-semibold text-slate-900'>{product.name}</h3>
-      <p className='mt-2 text-sm text-slate-500 flex-1'>
+    <div className='flex flex-col rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm transition-all hover:shadow-md'>
+      <h3 className='text-lg font-semibold text-slate-900 dark:text-slate-50'>
+        {product.name}
+      </h3>
+      <p className='mt-2 text-sm text-slate-500 dark:text-slate-400 flex-1'>
         {product.description || 'No description provided.'}
       </p>
 
       <div className='my-4'>
-        <div className='text-sm font-medium text-slate-900'>Payout</div>
+        <div className='text-sm font-medium text-slate-900 dark:text-slate-50'>
+          Payout
+        </div>
         <div className='text-2xl font-bold text-blue-600'>
           ${product.payout_per_conversion.toFixed(2)}
         </div>
-        <div className='text-xs text-slate-500'>per conversion</div>
+        <div className='text-xs text-slate-500 dark:text-slate-400'>
+          per conversion
+        </div>
       </div>
 
-      <div className='mt-auto pt-4 border-t border-slate-100'>
+      <div className='mt-auto pt-4 border-t border-slate-100 dark:border-slate-800'>
         {isLinkReady ? (
           <div className='space-y-2'>
-            <div className='rounded bg-slate-50 p-2 text-xs text-slate-600 break-all font-mono border border-slate-200'>
+            <div className='rounded bg-slate-50 dark:bg-slate-800/50 p-2 text-xs text-slate-600 dark:text-slate-300 break-all font-mono border border-slate-200 dark:border-slate-700'>
               {link}
             </div>
             <Button

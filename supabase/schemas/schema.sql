@@ -7,7 +7,7 @@ CREATE TABLE public.profiles (
   role TEXT NOT NULL CHECK (role IN ('admin', 'affiliate')),
   full_name TEXT,
   email TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'suspended')),
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'suspended')),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -77,6 +77,16 @@ CREATE TABLE public.withdrawal_requests (
   processed_at TIMESTAMPTZ
 );
 
+-- ADMIN NOTIFICATIONS
+CREATE TABLE public.admin_notifications (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  type TEXT NOT NULL,
+  message TEXT NOT NULL,
+  is_read BOOLEAN DEFAULT FALSE,
+  metadata JSONB DEFAULT '{}'::JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Indexes
 CREATE INDEX idx_affiliate_clicks_link ON public.affiliate_clicks(affiliate_link_id);
 CREATE INDEX idx_conversions_link ON public.conversions(affiliate_link_id);
@@ -110,15 +120,43 @@ AFTER INSERT OR UPDATE ON public.conversions
 FOR EACH ROW
 EXECUTE FUNCTION update_wallet_on_conversion();
 
+-- Withdrawal Wallet Logic Function
+CREATE OR REPLACE FUNCTION update_wallet_on_withdrawal()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'UPDATE' AND NEW.status = 'paid' AND OLD.status != 'paid' THEN
+    UPDATE public.affiliate_wallets
+    SET 
+      available_balance = available_balance - NEW.amount,
+      total_withdrawn = total_withdrawn + NEW.amount,
+      updated_at = NOW()
+    WHERE affiliate_id = NEW.affiliate_id;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_update_wallet_withdrawal ON public.withdrawal_requests;
+CREATE TRIGGER trg_update_wallet_withdrawal
+AFTER UPDATE ON public.withdrawal_requests
+FOR EACH ROW
+EXECUTE FUNCTION update_wallet_on_withdrawal();
+
 -- Handle New User Function
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, email, role, full_name)
-  VALUES (NEW.id, NEW.email, 'affiliate', NEW.raw_user_meta_data->>'full_name');
+  INSERT INTO public.profiles (id, email, role, full_name, status)
+  VALUES (NEW.id, NEW.email, 'affiliate', NEW.raw_user_meta_data->>'full_name', 'pending');
   
   INSERT INTO public.affiliate_wallets (affiliate_id) VALUES (NEW.id);
   
+  INSERT INTO public.admin_notifications (type, message, metadata)
+  VALUES ('new_affiliate', 'New affiliate signed up: ' || NEW.email, jsonb_build_object('user_id', NEW.id, 'email', NEW.email));
+
+  -- We can also optionally trigger an http POST or use a database webhook extension (pg_net) to call the Deno Edge Function here
+  -- For now, the webhook/email alert can be set up via Supabase Database Webhooks connecting to the admin_notifications insert event.
+
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -272,3 +310,15 @@ CREATE POLICY "Admins can update requests."
   ON public.withdrawal_requests FOR UPDATE
   USING ( public.is_admin() );
 
+-- 8. admin_notifications
+ALTER TABLE public.admin_notifications ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Admins view all notifications."
+  ON public.admin_notifications FOR SELECT
+  USING ( public.is_admin() );
+
+CREATE POLICY "Admins can update notifications."
+  ON public.admin_notifications FOR UPDATE
+  USING ( public.is_admin() );
+
+-- Note: Insert happens via the database trigger (security definer) which bypasses RLS

@@ -24,5 +24,6 @@ export default [
     // Admin Routes
     route("admin/products", "routes/admin/products.tsx"),
     route("admin/withdrawals", "routes/admin/withdrawals.tsx"),
+    route("admin/affiliates", "routes/admin/affiliates.tsx"),
   ]),
 ] satisfies RouteConfig;

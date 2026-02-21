@@ -7,6 +7,7 @@ type AuthContextType = {
   session: Session | null
   loading: boolean
   role: 'admin' | 'affiliate' | null
+  status: 'active' | 'pending' | 'suspended' | null
   signOut: () => Promise<void>
 }
 
@@ -17,6 +18,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const [role, setRole] = useState<'admin' | 'affiliate' | null>(null)
+  const [status, setStatus] = useState<
+    'active' | 'pending' | 'suspended' | null
+  >(null)
 
   useEffect(() => {
     // Check active session
@@ -40,6 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         fetchUserRole(session.user.id)
       } else {
         setRole(null)
+        setStatus(null)
         setLoading(false)
       }
     })
@@ -51,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, status')
         .eq('id', userId)
         .single()
 
@@ -59,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error fetching role:', error)
       } else {
         setRole(data?.role as 'admin' | 'affiliate' | null)
+        setStatus(data?.status as 'active' | 'pending' | 'suspended' | null)
       }
     } catch (error) {
       console.error('Error fetching role:', error)
@@ -72,10 +78,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
     setSession(null)
     setRole(null)
+    setStatus(null)
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, role, signOut }}>
+    <AuthContext.Provider
+      value={{ user, session, loading, role, status, signOut }}>
       {children}
     </AuthContext.Provider>
   )

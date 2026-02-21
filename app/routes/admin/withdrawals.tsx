@@ -26,18 +26,20 @@ export default function AdminWithdrawals() {
   return (
     <div className='space-y-6'>
       <div>
-        <h1 className='text-2xl font-bold tracking-tight text-slate-900'>
+        <h1 className='text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50'>
           Withdrawals
         </h1>
-        <p className='text-slate-500'>Manage affiliate payout requests.</p>
+        <p className='text-slate-500 dark:text-slate-400'>
+          Manage affiliate payout requests.
+        </p>
       </div>
 
-      <div className='rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden'>
+      <div className='rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden'>
         <div className='overflow-x-auto'>
-          <table className='min-w-full divide-y divide-slate-200'>
-            <thead className='bg-slate-50'>
+          <table className='min-w-full divide-y divide-slate-200 dark:divide-slate-800'>
+            <thead className='bg-slate-50 dark:bg-slate-800/50'>
               <tr>
-                <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500'>
+                <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400'>
                   Affiliate
                 </th>
                 <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500'>
@@ -60,7 +62,7 @@ export default function AdminWithdrawals() {
                 </th>
               </tr>
             </thead>
-            <tbody className='divide-y divide-slate-200 bg-white'>
+            <tbody className='divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900'>
               {isLoading ? (
                 <tr>
                   <td
@@ -81,24 +83,24 @@ export default function AdminWithdrawals() {
                 requests.map((req) => (
                   <tr key={req.id}>
                     <td className='whitespace-nowrap px-6 py-4'>
-                      <div className='text-sm font-medium text-slate-900'>
+                      <div className='text-sm font-medium text-slate-900 dark:text-slate-50'>
                         {req.profile?.full_name || 'Unknown'}
                       </div>
-                      <div className='text-sm text-slate-500'>
+                      <div className='text-sm text-slate-500 dark:text-slate-400'>
                         {req.profile?.email}
                       </div>
                     </td>
-                    <td className='whitespace-nowrap px-6 py-4 text-sm text-slate-900'>
+                    <td className='whitespace-nowrap px-6 py-4 text-sm text-slate-900 dark:text-slate-50'>
                       {new Date(req.requested_at).toLocaleDateString()}
                     </td>
-                    <td className='whitespace-nowrap px-6 py-4 text-sm font-bold text-slate-900'>
+                    <td className='whitespace-nowrap px-6 py-4 text-sm font-bold text-slate-900 dark:text-slate-50'>
                       ${req.amount.toFixed(2)}
                     </td>
-                    <td className='whitespace-nowrap px-6 py-4 text-sm text-slate-500 capitalize'>
+                    <td className='whitespace-nowrap px-6 py-4 text-sm text-slate-500 dark:text-slate-400 capitalize'>
                       {req.payment_method}
                     </td>
                     <td
-                      className='max-w-xs truncate px-6 py-4 text-sm text-slate-500'
+                      className='max-w-xs truncate px-6 py-4 text-sm text-slate-500 dark:text-slate-400'
                       title={req.payment_details?.detail}>
                       {req.payment_details?.detail || '-'}
                     </td>
@@ -112,7 +114,7 @@ export default function AdminWithdrawals() {
                               ? 'bg-yellow-100 text-yellow-800'
                               : req.status === 'rejected'
                                 ? 'bg-red-100 text-red-800'
-                                : 'bg-slate-100 text-slate-800'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200'
                         }`}>
                         {req.status}
                       </span>

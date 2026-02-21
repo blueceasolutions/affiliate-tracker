@@ -33,10 +33,12 @@ export default function AffiliateWallet() {
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
         <div>
-          <h1 className='text-2xl font-bold tracking-tight text-slate-900'>
+          <h1 className='text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50'>
             Wallet
           </h1>
-          <p className='text-slate-500'>Manage earnings and withdrawals.</p>
+          <p className='text-slate-500 dark:text-slate-400'>
+            Manage earnings and withdrawals.
+          </p>
         </div>
         <Button
           onClick={() => setIsModalOpen(true)}
@@ -67,34 +69,36 @@ export default function AffiliateWallet() {
         />
       </div>
 
-      <div className='rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden'>
-        <div className='px-6 py-4 border-b border-slate-200'>
-          <h3 className='font-semibold text-slate-900'>Withdrawal History</h3>
+      <div className='rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden'>
+        <div className='px-6 py-4 border-b border-slate-200 dark:border-slate-800'>
+          <h3 className='font-semibold text-slate-900 dark:text-slate-50'>
+            Withdrawal History
+          </h3>
         </div>
         <div className='overflow-x-auto'>
-          <table className='min-w-full divide-y divide-slate-200'>
-            <thead className='bg-slate-50'>
+          <table className='min-w-full divide-y divide-slate-200 dark:divide-slate-800'>
+            <thead className='bg-slate-50 dark:bg-slate-800/50'>
               <tr>
-                <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500'>
+                <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400'>
                   Date
                 </th>
-                <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500'>
+                <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400'>
                   Amount
                 </th>
-                <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500'>
+                <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400'>
                   Method
                 </th>
-                <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500'>
+                <th className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400'>
                   Status
                 </th>
               </tr>
             </thead>
-            <tbody className='divide-y divide-slate-200 bg-white'>
+            <tbody className='divide-y divide-slate-200 dark:divide-slate-800 bg-white dark:bg-slate-900'>
               {isLoadingHistory ? (
                 <tr>
                   <td
                     colSpan={4}
-                    className='px-6 py-4 text-center text-sm text-slate-500'>
+                    className='px-6 py-4 text-center text-sm text-slate-500 dark:text-slate-400'>
                     Loading history...
                   </td>
                 </tr>
@@ -102,20 +106,20 @@ export default function AffiliateWallet() {
                 <tr>
                   <td
                     colSpan={4}
-                    className='px-6 py-4 text-center text-sm text-slate-500'>
+                    className='px-6 py-4 text-center text-sm text-slate-500 dark:text-slate-400'>
                     No withdrawal history found.
                   </td>
                 </tr>
               ) : (
                 withdrawals.map((req) => (
                   <tr key={req.id}>
-                    <td className='whitespace-nowrap px-6 py-4 text-sm text-slate-900'>
+                    <td className='whitespace-nowrap px-6 py-4 text-sm text-slate-900 dark:text-slate-50'>
                       {new Date(req.requested_at).toLocaleDateString()}
                     </td>
-                    <td className='whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-900'>
+                    <td className='whitespace-nowrap px-6 py-4 text-sm font-medium text-slate-900 dark:text-slate-50'>
                       ${req.amount.toFixed(2)}
                     </td>
-                    <td className='whitespace-nowrap px-6 py-4 text-sm text-slate-500 capitalize'>
+                    <td className='whitespace-nowrap px-6 py-4 text-sm text-slate-500 dark:text-slate-400 capitalize'>
                       {req.payment_method}
                     </td>
                     <td className='whitespace-nowrap px-6 py-4'>
@@ -128,7 +132,7 @@ export default function AffiliateWallet() {
                               ? 'bg-yellow-100 text-yellow-800'
                               : req.status === 'rejected'
                                 ? 'bg-red-100 text-red-800'
-                                : 'bg-slate-100 text-slate-800'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200'
                         }`}>
                         {req.status}
                       </span>
@@ -161,17 +165,23 @@ export default function AffiliateWallet() {
 
 function StatsCard({ title, value, icon: Icon, description }: any) {
   return (
-    <div className='rounded-xl border border-slate-200 bg-white p-6 shadow-sm'>
+    <div className='rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm'>
       <div className='flex items-center justify-between'>
         <div>
-          <p className='text-sm font-medium text-slate-500'>{title}</p>
-          <p className='text-2xl font-bold text-slate-900'>{value}</p>
+          <p className='text-sm font-medium text-slate-500 dark:text-slate-400'>
+            {title}
+          </p>
+          <p className='text-2xl font-bold text-slate-900 dark:text-slate-50'>
+            {value}
+          </p>
         </div>
-        <div className='flex h-12 w-12 items-center justify-center rounded-full bg-slate-50'>
-          <Icon className='h-6 w-6 text-slate-400' />
+        <div className='flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50'>
+          <Icon className='h-6 w-6 text-slate-400 dark:text-slate-500' />
         </div>
       </div>
-      <p className='mt-1 text-xs text-slate-400'>{description}</p>
+      <p className='mt-1 text-xs text-slate-400 dark:text-slate-500'>
+        {description}
+      </p>
     </div>
   )
 }
@@ -225,7 +235,7 @@ function WithdrawalForm({
   return (
     <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
       <div>
-        <label className='block text-sm font-medium text-slate-700'>
+        <label className='block text-sm font-medium text-slate-700 dark:text-slate-300'>
           Amount ($)
         </label>
         <Input
@@ -238,17 +248,17 @@ function WithdrawalForm({
         {errors.amount && (
           <p className='text-xs text-red-500 mt-1'>{errors.amount.message}</p>
         )}
-        <p className='text-xs text-slate-500 mt-1'>
+        <p className='text-xs text-slate-500 dark:text-slate-400 mt-1'>
           Available: ${maxAmount.toFixed(2)}
         </p>
       </div>
 
       <div>
-        <label className='block text-sm font-medium text-slate-700'>
+        <label className='block text-sm font-medium text-slate-700 dark:text-slate-300'>
           Payment Method
         </label>
         <select
-          className='flex w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600'
+          className='flex w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600'
           {...register('payment_method')}>
           <option value='paypal'>PayPal</option>
           <option value='crypto'>Crypto</option>
@@ -257,7 +267,7 @@ function WithdrawalForm({
       </div>
 
       <div>
-        <label className='block text-sm font-medium text-slate-700'>
+        <label className='block text-sm font-medium text-slate-700 dark:text-slate-300'>
           Payment Details
         </label>
         <Input
