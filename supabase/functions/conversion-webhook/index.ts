@@ -17,15 +17,12 @@ app.use(
 app.post("/*", async (c: Context) => {
   try {
     const payload = await c.req.json().catch(() => ({}));
-    console.log("Webhook Payload:", payload, payload.event);
 
     if (payload.event === "charge.success") {
       const data = payload.data;
       const customerEmail = data.customer?.email;
 
       const customFields = data.metadata?.custom_fields || [];
-
-      console.log("Webhook Payload:", JSON.stringify(customFields));
 
       const affiliateField = customFields.find((
         f: { variable_name: string; value: string },
@@ -44,16 +41,27 @@ app.post("/*", async (c: Context) => {
 
       const { data: link, error: linkError } = await supabaseAdmin
         .from("affiliate_links")
-        .select("id, product_id, product:products(payout_per_conversion)")
+        .select(
+          "id, product_id, product:products(payout_per_conversion), profiles(email)",
+        )
         .eq("id", affiliateLinkId)
         .single();
 
       if (linkError || !link) {
-        console.error(
-          "Webhook Error: Invalid affiliate link ID",
-          affiliateLinkId,
-        );
         return c.text("Invalid affiliate link", 400);
+      }
+
+      // Check for self-referral
+      const affiliateProfile = Array.isArray(link.profiles)
+        ? link.profiles[0]
+        : link.profiles;
+      const affiliateEmail = affiliateProfile?.email;
+
+      if (
+        affiliateEmail && customerEmail &&
+        affiliateEmail.toLowerCase() === customerEmail.toLowerCase()
+      ) {
+        return c.text("Self-referrals are not rewarded", 200);
       }
 
       const productData = Array.isArray(link.product)
@@ -84,9 +92,9 @@ app.post("/*", async (c: Context) => {
       if (insertError) {
         console.error(
           "Webhook Error: Failed to insert conversion",
-          insertError,
+          JSON.stringify(insertError, null, 2),
         );
-        return c.text("Database error", 500);
+        return c.text(`Database error: ${insertError.message}`, 500);
       }
 
       return c.text("Conversion verified and wallet updated", 200);

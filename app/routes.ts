@@ -15,9 +15,6 @@ export default [
   // App / API Routes
   route("ref/:code", "routes/ref.tsx"),
 
-  // Test Routes
-  route("test/conversion", "routes/test/conversion.tsx"),
-
   // Protected Routes
   layout("routes/layouts/dashboard-layout.tsx", [
     route("dashboard", "routes/dashboard/overview.tsx"),

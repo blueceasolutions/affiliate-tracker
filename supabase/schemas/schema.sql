@@ -87,7 +87,7 @@ CREATE INDEX idx_withdrawal_requests_affiliate ON public.withdrawal_requests(aff
 CREATE OR REPLACE FUNCTION update_wallet_on_conversion()
 RETURNS TRIGGER AS $$
 BEGIN
-  IF NEW.status = 'approved' AND (OLD.status IS NULL OR OLD.status != 'approved') THEN
+  IF (TG_OP = 'INSERT' AND NEW.status = 'approved') OR (TG_OP = 'UPDATE' AND NEW.status = 'approved' AND OLD.status != 'approved') THEN
     INSERT INTO public.affiliate_wallets (affiliate_id, total_earned, available_balance)
     SELECT
       al.affiliate_id,
@@ -104,8 +104,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trg_update_wallet_conversion ON public.conversions;
 CREATE TRIGGER trg_update_wallet_conversion
-AFTER UPDATE ON public.conversions
+AFTER INSERT OR UPDATE ON public.conversions
 FOR EACH ROW
 EXECUTE FUNCTION update_wallet_on_conversion();
 

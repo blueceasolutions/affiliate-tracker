@@ -7,6 +7,7 @@ import {
   ShoppingCart,
   TrendingUp,
 } from 'lucide-react'
+import { Link } from 'react-router'
 
 export default function DashboardOverview() {
   const { user } = useAuth()
@@ -100,16 +101,16 @@ export default function DashboardOverview() {
           Quick Actions
         </h3>
         <div className='flex gap-4'>
-          <a
-            href='/affiliate/products'
+          <Link
+            to='/affiliate/products'
             className='inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
             Promote Products
-          </a>
-          <a
-            href='/affiliate/wallet'
+          </Link>
+          <Link
+            to='/affiliate/wallet'
             className='inline-flex items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'>
             View Wallet
-          </a>
+          </Link>
         </div>
       </div>
     </div>

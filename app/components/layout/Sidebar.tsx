@@ -17,8 +17,7 @@ export function SidebarContent() {
 
   const affiliateLinks = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Campaigns', href: '/affiliate/campaigns', icon: ShoppingBag }, // Used ShoppingBag as placeholder for Campaigns based on previous code
-    { name: 'Reports', href: '/affiliate/reports', icon: Users }, // Placeholder for Reports
+    { name: 'Products', href: '/affiliate/products', icon: ShoppingBag },
     { name: 'Payouts', href: '/affiliate/wallet', icon: Wallet },
   ]
 
