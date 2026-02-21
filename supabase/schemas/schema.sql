@@ -112,7 +112,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 DROP TRIGGER IF EXISTS trg_update_wallet_conversion ON public.conversions;
 CREATE TRIGGER trg_update_wallet_conversion
@@ -134,7 +134,7 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 DROP TRIGGER IF EXISTS trg_update_wallet_withdrawal ON public.withdrawal_requests;
 CREATE TRIGGER trg_update_wallet_withdrawal
