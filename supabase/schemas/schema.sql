@@ -65,6 +65,18 @@ CREATE TABLE public.affiliate_wallets (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- PAYMENT METHODS
+CREATE TABLE public.payment_methods (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  affiliate_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  currency TEXT NOT NULL CHECK (currency IN ('USD', 'NGN')),
+  type TEXT NOT NULL CHECK (type IN ('bank', 'paypal', 'crypto')),
+  details JSONB NOT NULL DEFAULT '{}'::JSONB,
+  is_default BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- WITHDRAWAL REQUESTS
 CREATE TABLE public.withdrawal_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -92,6 +104,7 @@ CREATE INDEX idx_affiliate_clicks_link ON public.affiliate_clicks(affiliate_link
 CREATE INDEX idx_conversions_link ON public.conversions(affiliate_link_id);
 CREATE INDEX idx_conversions_status ON public.conversions(status);
 CREATE INDEX idx_withdrawal_requests_affiliate ON public.withdrawal_requests(affiliate_id);
+CREATE INDEX idx_payment_methods_affiliate ON public.payment_methods(affiliate_id);
 
 -- Wallet Logic Function
 CREATE OR REPLACE FUNCTION update_wallet_on_conversion()
@@ -121,17 +134,62 @@ FOR EACH ROW
 EXECUTE FUNCTION update_wallet_on_conversion();
 
 -- Withdrawal Wallet Logic Function
+CREATE OR REPLACE FUNCTION check_and_deduct_withdrawal_request()
+RETURNS TRIGGER AS $$
+DECLARE
+  available_bal DECIMAL(10, 2);
+BEGIN
+  -- Get current available balance
+  SELECT available_balance INTO available_bal
+  FROM public.affiliate_wallets
+  WHERE affiliate_id = NEW.affiliate_id;
+
+  IF NEW.amount < 10 THEN
+    RAISE EXCEPTION 'Minimum withdrawal amount is $10.';
+  END IF;
+
+  IF available_bal < NEW.amount THEN
+    RAISE EXCEPTION 'Insufficient balance for withdrawal.';
+  END IF;
+
+  -- Deduct on insert
+  UPDATE public.affiliate_wallets
+  SET 
+    available_balance = available_balance - NEW.amount,
+    updated_at = NOW()
+  WHERE affiliate_id = NEW.affiliate_id;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trg_check_deduct_withdrawal_request ON public.withdrawal_requests;
+CREATE TRIGGER trg_check_deduct_withdrawal_request
+BEFORE INSERT ON public.withdrawal_requests
+FOR EACH ROW
+EXECUTE FUNCTION check_and_deduct_withdrawal_request();
+
 CREATE OR REPLACE FUNCTION update_wallet_on_withdrawal()
 RETURNS TRIGGER AS $$
 BEGIN
+  -- If paid, increment total_withdrawn. available_balance was already deducted.
   IF TG_OP = 'UPDATE' AND NEW.status = 'paid' AND OLD.status != 'paid' THEN
     UPDATE public.affiliate_wallets
     SET 
-      available_balance = available_balance - NEW.amount,
       total_withdrawn = total_withdrawn + NEW.amount,
       updated_at = NOW()
     WHERE affiliate_id = NEW.affiliate_id;
   END IF;
+
+  -- If rejected, add the amount back to available_balance
+  IF TG_OP = 'UPDATE' AND NEW.status = 'rejected' AND OLD.status != 'rejected' THEN
+    UPDATE public.affiliate_wallets
+    SET 
+      available_balance = available_balance + NEW.amount,
+      updated_at = NOW()
+    WHERE affiliate_id = NEW.affiliate_id;
+  END IF;
+  
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -310,7 +368,30 @@ CREATE POLICY "Admins can update requests."
   ON public.withdrawal_requests FOR UPDATE
   USING ( public.is_admin() );
 
--- 8. admin_notifications
+-- 8. payment_methods
+ALTER TABLE public.payment_methods ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Affiliates view own payment methods."
+  ON public.payment_methods FOR SELECT
+  USING ( auth.uid() = affiliate_id );
+
+CREATE POLICY "Admins view all payment methods."
+  ON public.payment_methods FOR SELECT
+  USING ( public.is_admin() );
+
+CREATE POLICY "Affiliates can create payment methods."
+  ON public.payment_methods FOR INSERT
+  WITH CHECK ( auth.uid() = affiliate_id );
+
+CREATE POLICY "Affiliates can update own payment methods."
+  ON public.payment_methods FOR UPDATE
+  USING ( auth.uid() = affiliate_id );
+
+CREATE POLICY "Affiliates can delete own payment methods."
+  ON public.payment_methods FOR DELETE
+  USING ( auth.uid() = affiliate_id );
+
+-- 9. admin_notifications
 ALTER TABLE public.admin_notifications ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Admins view all notifications."

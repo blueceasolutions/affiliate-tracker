@@ -10,7 +10,9 @@ import {
   getWallet,
   getWithdrawalRequests,
   requestWithdrawal,
+  getPaymentMethods,
 } from '../../lib/api'
+import { Link, useNavigate } from 'react-router'
 import { CreditCard, History, Wallet } from 'lucide-react'
 
 export default function AffiliateWallet() {
@@ -187,11 +189,8 @@ function StatsCard({ title, value, icon: Icon, description }: any) {
 }
 
 const withdrawalSchema = z.object({
-  amount: z.coerce.number().min(1, 'Minimum withdrawal is $1'),
-  payment_method: z.string().min(1, 'Select a payment method'),
-  payment_details: z
-    .string()
-    .min(3, 'Enter payment details (e.g. email or wallet address)'),
+  amount: z.coerce.number().min(10, 'Minimum withdrawal is $10'),
+  payment_method_id: z.string().min(1, 'Select a payment method'),
 })
 
 type WithdrawalFormValues = z.infer<typeof withdrawalSchema>
@@ -205,37 +204,82 @@ function WithdrawalForm({
   onSuccess: () => void
   onCancel: () => void
 }) {
+  const navigate = useNavigate()
+
+  const { data: paymentMethods = [], isLoading } = useQuery({
+    queryKey: ['paymentMethods'],
+    queryFn: getPaymentMethods,
+  })
+
+  // Pre-select default payment method if it exists
+  const defaultMethod = paymentMethods.find((m) => m.is_default)
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<WithdrawalFormValues>({
     resolver: zodResolver(withdrawalSchema) as Resolver<WithdrawalFormValues>,
-    defaultValues: {
-      payment_method: 'paypal',
-    },
   })
 
   const mutation = useMutation({
-    mutationFn: (data: WithdrawalFormValues) =>
-      requestWithdrawal(data.amount, data.payment_method, {
-        detail: data.payment_details,
-      }),
+    mutationFn: (data: WithdrawalFormValues) => {
+      const selectedMethod = paymentMethods.find(
+        (m) => m.id === data.payment_method_id,
+      )
+      if (!selectedMethod) throw new Error('Invalid payment method')
+
+      return requestWithdrawal(
+        data.amount,
+        selectedMethod.type,
+        selectedMethod.details,
+      )
+    },
     onSuccess,
+    onError: (err: any) => {
+      alert(err.message || 'An error occurred while requesting withdrawal.')
+    },
   })
 
   const onSubmit = (data: WithdrawalFormValues) => {
     if (data.amount > maxAmount) {
-      alert(`Amount exceeds available balance of $${maxAmount}`)
+      alert(`Amount exceeds available balance of $${maxAmount.toFixed(2)}`)
       return
     }
     mutation.mutate(data)
   }
 
+  if (isLoading) {
+    return (
+      <div className='text-sm text-slate-500 py-4 text-center'>
+        Loading payment methods...
+      </div>
+    )
+  }
+
+  if (paymentMethods.length === 0) {
+    return (
+      <div className='text-center py-6 space-y-4'>
+        <p className='text-sm text-slate-600 dark:text-slate-400'>
+          You don't have any payment methods configured.
+        </p>
+        <Button
+          onClick={() => {
+            onCancel()
+            navigate('/affiliate/settings')
+          }}>
+          Go to Settings to add one
+        </Button>
+      </div>
+    )
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className='space-y-5 animate-in fade-in duration-300'>
       <div>
-        <label className='block text-sm font-medium text-slate-700 dark:text-slate-300'>
+        <label className='block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1'>
           Amount ($)
         </label>
         <Input
@@ -248,41 +292,55 @@ function WithdrawalForm({
         {errors.amount && (
           <p className='text-xs text-red-500 mt-1'>{errors.amount.message}</p>
         )}
-        <p className='text-xs text-slate-500 dark:text-slate-400 mt-1'>
-          Available: ${maxAmount.toFixed(2)}
-        </p>
+        <div className='flex justify-between mt-1 text-xs text-slate-500 dark:text-slate-400'>
+          <span>Min: $10.00</span>
+          <span>Max: ${maxAmount.toFixed(2)}</span>
+        </div>
       </div>
 
       <div>
-        <label className='block text-sm font-medium text-slate-700 dark:text-slate-300'>
+        <label className='block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2'>
           Payment Method
         </label>
-        <select
-          className='flex w-full rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600'
-          {...register('payment_method')}>
-          <option value='paypal'>PayPal</option>
-          <option value='crypto'>Crypto</option>
-          <option value='bank'>Bank Transfer</option>
-        </select>
-      </div>
-
-      <div>
-        <label className='block text-sm font-medium text-slate-700 dark:text-slate-300'>
-          Payment Details
-        </label>
-        <Input
-          placeholder='Email, Wallet Address, or IBAN'
-          {...register('payment_details')}
-          className={errors.payment_details ? 'border-red-500' : ''}
-        />
-        {errors.payment_details && (
+        <div className='space-y-2 max-h-[240px] overflow-y-auto p-1'>
+          {paymentMethods.map((method) => {
+            const detailPreview =
+              method.type === 'paypal'
+                ? method.details.email
+                : method.type === 'bank'
+                  ? method.details.account_number
+                  : method.details.address
+            return (
+              <label
+                key={method.id}
+                className='flex items-center space-x-3 p-3 rounded-xl border border-slate-200 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors'>
+                <input
+                  type='radio'
+                  value={method.id}
+                  defaultChecked={defaultMethod?.id === method.id}
+                  className='h-4 w-4 text-blue-600 border-slate-300 focus:ring-blue-600 dark:border-slate-700 dark:bg-slate-900'
+                  {...register('payment_method_id')}
+                />
+                <div className='flex flex-col'>
+                  <span className='text-sm font-medium text-slate-900 dark:text-slate-50 uppercase'>
+                    {method.type} ({method.currency})
+                  </span>
+                  <span className='text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]'>
+                    {detailPreview}
+                  </span>
+                </div>
+              </label>
+            )
+          })}
+        </div>
+        {errors.payment_method_id && (
           <p className='text-xs text-red-500 mt-1'>
-            {errors.payment_details.message}
+            {errors.payment_method_id.message}
           </p>
         )}
       </div>
 
-      <div className='flex justify-end gap-3 pt-4'>
+      <div className='flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800'>
         <Button type='button' variant='ghost' onClick={onCancel}>
           Cancel
         </Button>

@@ -66,3 +66,14 @@ export interface WithdrawalRequest {
   processed_at: string | null;
   profile?: Profile; // for joined queries
 }
+
+export interface PaymentMethod {
+  id: string;
+  affiliate_id: string;
+  currency: "USD" | "NGN";
+  type: "bank" | "paypal" | "crypto";
+  details: any;
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+}

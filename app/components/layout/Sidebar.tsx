@@ -1,5 +1,7 @@
 import { Link, useLocation } from 'react-router'
 import { useAuth } from '../../context/AuthContext'
+import { useQuery } from '@tanstack/react-query'
+import { getAdminPendingCounts } from '../../lib/api'
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -15,6 +17,13 @@ export function SidebarContent() {
   const { user, role, signOut } = useAuth()
   const location = useLocation()
 
+  const { data: pendingCounts } = useQuery({
+    queryKey: ['adminPendingCounts'],
+    queryFn: getAdminPendingCounts,
+    enabled: role === 'admin',
+    refetchInterval: 60000, // Refresh every minute
+  })
+
   const affiliateLinks = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Products', href: '/affiliate/products', icon: ShoppingBag },
@@ -24,8 +33,18 @@ export function SidebarContent() {
   const adminLinks = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Products', href: '/admin/products', icon: ShoppingBag },
-    { name: 'Withdrawals', href: '/admin/withdrawals', icon: Wallet },
-    { name: 'Affiliates', href: '/admin/affiliates', icon: Users },
+    {
+      name: 'Withdrawals',
+      href: '/admin/withdrawals',
+      icon: Wallet,
+      badge: pendingCounts?.withdrawals,
+    },
+    {
+      name: 'Affiliates',
+      href: '/admin/affiliates',
+      icon: Users,
+      badge: pendingCounts?.affiliates,
+    },
   ]
 
   const links = role === 'admin' ? adminLinks : affiliateLinks
@@ -94,7 +113,12 @@ export function SidebarContent() {
                   )}
                   strokeWidth={2.5}
                 />
-                {link.name}
+                <span className='flex-1'>{link.name}</span>
+                {!!(link as any).badge && (
+                  <span className='ml-auto inline-flex items-center justify-center rounded-full bg-brand text-white px-2 py-0.5 text-xs font-medium leading-none'>
+                    {(link as any).badge}
+                  </span>
+                )}
               </Link>
             )
           })}

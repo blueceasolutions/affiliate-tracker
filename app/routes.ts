@@ -20,10 +20,12 @@ export default [
     route("dashboard", "routes/dashboard/overview.tsx"),
     route("affiliate/products", "routes/affiliate/products.tsx"),
     route("affiliate/wallet", "routes/affiliate/wallet.tsx"),
+    route("affiliate/settings", "routes/affiliate/settings.tsx"),
 
     // Admin Routes
     route("admin/products", "routes/admin/products.tsx"),
     route("admin/withdrawals", "routes/admin/withdrawals.tsx"),
     route("admin/affiliates", "routes/admin/affiliates.tsx"),
+    route("admin/settings", "routes/admin/settings.tsx"),
   ]),
 ] satisfies RouteConfig;

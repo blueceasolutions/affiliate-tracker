@@ -1,6 +1,7 @@
 import { supabase } from "./supabase";
 import type {
   AffiliateWallet,
+  PaymentMethod,
   Product,
   Profile,
   WithdrawalRequest,
@@ -44,6 +45,25 @@ export async function updateProduct(id: string, updates: Partial<Product>) {
 }
 
 // --- Admin Withdrawal Functions ---
+
+export async function getAdminPendingCounts() {
+  const [withdrawals, affiliates] = await Promise.all([
+    supabase
+      .from("withdrawal_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "pending"),
+    supabase
+      .from("profiles")
+      .select("id", { count: "exact", head: true })
+      .eq("role", "affiliate")
+      .eq("status", "pending"),
+  ]);
+
+  return {
+    withdrawals: withdrawals.count || 0,
+    affiliates: affiliates.count || 0,
+  };
+}
 
 export async function getAllWithdrawalRequests() {
   const { data, error } = await supabase
@@ -252,6 +272,86 @@ export async function requestWithdrawal(
 
   if (error) throw error;
   return data;
+}
+
+// --- Payment Methods ---
+
+export async function getPaymentMethods() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
+  const { data, error } = await supabase
+    .from("payment_methods")
+    .select("*")
+    .eq("affiliate_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data as PaymentMethod[];
+}
+
+export async function createPaymentMethod(
+  paymentMethod: Omit<
+    PaymentMethod,
+    "id" | "affiliate_id" | "created_at" | "updated_at"
+  >,
+) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
+  const { data, error } = await supabase
+    .from("payment_methods")
+    .insert([
+      {
+        ...paymentMethod,
+        affiliate_id: user.id,
+      },
+    ])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as PaymentMethod;
+}
+
+export async function updatePaymentMethod(
+  id: string,
+  updates: Partial<PaymentMethod>,
+) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
+  const { data, error } = await supabase
+    .from("payment_methods")
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("affiliate_id", user.id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as PaymentMethod;
+}
+
+export async function deletePaymentMethod(id: string) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
+  const { error } = await supabase
+    .from("payment_methods")
+    .delete()
+    .eq("id", id)
+    .eq("affiliate_id", user.id);
+
+  if (error) throw error;
 }
 
 // --- Tracking Functions ---

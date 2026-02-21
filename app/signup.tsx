@@ -16,6 +16,9 @@ const signupSchema = z
     email: z.string().email('Invalid email address'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
     confirmPassword: z.string(),
+    acceptTerms: z.boolean().refine((val) => val === true, {
+      message: 'You must accept the terms and conditions',
+    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -184,6 +187,36 @@ export default function Signup() {
               <p className='text-sm text-red-700 dark:text-red-400'>{error}</p>
             </div>
           )}
+
+          {/* Terms and conditions */}
+          <div className='flex items-start pt-2 pb-1'>
+            <div className='flex h-5 items-center mt-0.5'>
+              <input
+                id='acceptTerms'
+                type='checkbox'
+                className='h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand dark:border-slate-700 dark:bg-slate-900 cursor-pointer'
+                {...register('acceptTerms')}
+              />
+            </div>
+            <div className='ml-2.5 text-sm'>
+              <label
+                htmlFor='acceptTerms'
+                className='text-slate-600 dark:text-slate-400 cursor-pointer'>
+                I agree to the{' '}
+                <Link
+                  to='/terms'
+                  target='_blank'
+                  className='font-medium text-brand hover:text-brand-dark transition-colors'>
+                  Terms of Service and Privacy Policy
+                </Link>
+              </label>
+              {errors.acceptTerms && (
+                <p className='mt-1 text-xs text-red-500'>
+                  {errors.acceptTerms.message}
+                </p>
+              )}
+            </div>
+          </div>
 
           {/* Submit */}
           <Button
