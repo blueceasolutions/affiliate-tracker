@@ -11,16 +11,28 @@ import { withdrawalsQuery, withdrawalsKey } from '../../api/queries/withdrawals'
 import { paymentMethodsQuery } from '../../api/queries/paymentMethods'
 import { requestWithdrawalMutation } from '../../api/mutations/requestWithdrawal'
 import { useNavigate } from 'react-router'
-import { CreditCard, History, Wallet } from 'lucide-react'
+import {
+  CreditCard,
+  History,
+  Wallet,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react'
 
 export default function AffiliateWallet() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [page, setPage] = useState(1)
+  const [statusFilter, setStatusFilter] = useState('ALL')
   const queryClient = useQueryClient()
 
   const { data: wallet, isLoading: isLoadingWallet } = useQuery(walletQuery)
 
-  const { data: withdrawals = [], isLoading: isLoadingHistory } =
-    useQuery(withdrawalsQuery)
+  const { data, isLoading: isLoadingHistory } = useQuery(
+    withdrawalsQuery(page, statusFilter),
+  )
+
+  const withdrawals = data?.data || []
+  const totalPages = data?.totalPages || 1
 
   const availableBalance = wallet?.available_balance || 0
 
@@ -65,10 +77,24 @@ export default function AffiliateWallet() {
       </div>
 
       <div className='rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden'>
-        <div className='px-6 py-4 border-b border-slate-200 dark:border-slate-800'>
+        <div className='px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4'>
           <h3 className='font-semibold text-slate-900 dark:text-slate-50'>
             Withdrawal History
           </h3>
+          <div className='sm:w-48'>
+            <select
+              className='block p-2 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white sm:text-sm focus:ring-brand focus:border-brand'
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value)
+                setPage(1)
+              }}>
+              <option value='ALL'>All Statuses</option>
+              <option value='pending'>Pending</option>
+              <option value='paid'>Paid</option>
+              <option value='rejected'>Rejected</option>
+            </select>
+          </div>
         </div>
         <div className='overflow-x-auto'>
           <table className='min-w-full divide-y divide-slate-200 dark:divide-slate-800'>
@@ -137,6 +163,54 @@ export default function AffiliateWallet() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination Details and Controls */}
+        <div className='flex items-center justify-between border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 sm:px-6'>
+          <div className='flex flex-1 justify-between sm:hidden'>
+            <Button
+              variant='outline'
+              disabled={page === 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}>
+              Previous
+            </Button>
+            <Button
+              variant='outline'
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
+              Next
+            </Button>
+          </div>
+          <div className='hidden sm:flex sm:flex-1 sm:items-center sm:justify-between'>
+            <div>
+              <p className='text-sm text-slate-700 dark:text-slate-300'>
+                Page <span className='font-medium'>{page}</span> of{' '}
+                <span className='font-medium'>{totalPages}</span>
+              </p>
+            </div>
+            <div>
+              <nav
+                className='isolate inline-flex -space-x-px rounded-md shadow-sm'
+                aria-label='Pagination'>
+                <Button
+                  variant='outline'
+                  className='rounded-l-md rounded-r-none px-2 py-2'
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}>
+                  <span className='sr-only'>Previous</span>
+                  <ChevronLeft className='h-5 w-5' aria-hidden='true' />
+                </Button>
+                <Button
+                  variant='outline'
+                  className='rounded-r-md rounded-l-none px-2 py-2'
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
+                  <span className='sr-only'>Next</span>
+                  <ChevronRight className='h-5 w-5' aria-hidden='true' />
+                </Button>
+              </nav>
+            </div>
+          </div>
         </div>
       </div>
 
