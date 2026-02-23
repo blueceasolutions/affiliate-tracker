@@ -1,19 +1,38 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Link } from 'react-router'
 import { Button } from '../../components/ui/button'
 import {
   adminAffiliatesQuery,
   adminAffiliatesKey,
 } from '../../api/queries/adminAffiliates'
 import { updateAffiliateStatusMutation } from '../../api/mutations/updateAffiliateStatus'
-import { Check, X, Ban, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  Check,
+  X,
+  Ban,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Eye,
+} from 'lucide-react'
 import type { Profile } from '../../types'
 
 export default function AdminAffiliates() {
   const [page, setPage] = useState(1)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState('ALL')
   const queryClient = useQueryClient()
 
-  const { data, isLoading } = useQuery(adminAffiliatesQuery(page))
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
+
+  const { data, isLoading } = useQuery(
+    adminAffiliatesQuery(page, debouncedSearch, statusFilter),
+  )
 
   const updateMutation = useMutation({
     ...updateAffiliateStatusMutation,
@@ -41,6 +60,41 @@ export default function AdminAffiliates() {
       </div>
 
       <div className='rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden'>
+        {/* Filters */}
+        <div className='p-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row gap-4'>
+          <div className='flex-1'>
+            <div className='relative rounded-md shadow-sm'>
+              <div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
+                <Search className='h-4 w-4 text-slate-400' />
+              </div>
+              <input
+                type='text'
+                className='block p-2 w-full pl-10 rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white sm:text-sm focus:ring-brand focus:border-brand'
+                placeholder='Search by affiliate name or email...'
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  setPage(1)
+                }}
+              />
+            </div>
+          </div>
+          <div className='sm:w-48'>
+            <select
+              className='block p-2 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-white sm:text-sm focus:ring-brand focus:border-brand'
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value)
+                setPage(1)
+              }}>
+              <option value='ALL'>All Statuses</option>
+              <option value='pending'>Pending</option>
+              <option value='active'>Active</option>
+              <option value='suspended'>Suspended</option>
+            </select>
+          </div>
+        </div>
+
         <div className='overflow-x-auto'>
           <table className='min-w-full divide-y divide-slate-200 dark:divide-slate-800'>
             <thead className='bg-slate-50 dark:bg-slate-800/50'>
@@ -105,6 +159,16 @@ export default function AdminAffiliates() {
                     </td>
                     <td className='whitespace-nowrap px-6 py-4 text-right text-sm font-medium'>
                       <div className='flex justify-end gap-2'>
+                        <Button
+                          size='sm'
+                          variant='outline'
+                          className='text-slate-600 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+                          onClick={() =>
+                            (window.location.href = `/admin/affiliates/${affiliate.id}`)
+                          }
+                          title='View Details'>
+                          <Eye className='h-4 w-4' />
+                        </Button>
                         {affiliate.status !== 'active' && (
                           <Button
                             size='sm'

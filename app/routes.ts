@@ -20,6 +20,7 @@ export default [
   // Protected Routes
   layout("routes/layouts/dashboard-layout.tsx", [
     route("dashboard", "routes/dashboard/overview.tsx"),
+    route("dashboard/conversions", "routes/dashboard/conversions.tsx"),
     route("affiliate/products", "routes/affiliate/products.tsx"),
     route("affiliate/wallet", "routes/affiliate/wallet.tsx"),
     route("affiliate/settings", "routes/affiliate/settings.tsx"),
@@ -28,6 +29,7 @@ export default [
     route("admin/products", "routes/admin/products.tsx"),
     route("admin/withdrawals", "routes/admin/withdrawals.tsx"),
     route("admin/affiliates", "routes/admin/affiliates.tsx"),
+    route("admin/affiliates/:id", "routes/admin/affiliates.$id.tsx"),
     route("admin/settings", "routes/admin/settings.tsx"),
   ]),
 ] satisfies RouteConfig;

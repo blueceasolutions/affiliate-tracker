@@ -14,14 +14,12 @@ export function GoogleSignInButton({ redirectTo }: GoogleSignInButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
-    await supabase.auth
-      .signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectTo ?? `${window.location.origin}/dashboard`,
-        },
-      })
-      .finally(() => setIsLoading(false))
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: redirectTo ?? `${window.location.origin}/dashboard`,
+      },
+    })
   }
 
   return (

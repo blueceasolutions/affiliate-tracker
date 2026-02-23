@@ -10,6 +10,7 @@ import {
   Settings,
   LogOut,
   Link as LinkIcon,
+  TrendingUp,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
@@ -25,6 +26,7 @@ export function SidebarContent() {
   const affiliateLinks = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Products', href: '/affiliate/products', icon: ShoppingBag },
+    { name: 'Conversions', href: '/dashboard/conversions', icon: TrendingUp },
     { name: 'Payouts', href: '/affiliate/wallet', icon: Wallet },
   ]
 

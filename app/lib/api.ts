@@ -115,14 +115,31 @@ export async function updateWithdrawalStatus(id: string, status: string) {
 
 // --- Admin Affiliate Functions ---
 
-export async function getAffiliates(page: number = 1, limit: number = 20) {
+export async function getAffiliates(
+  page: number = 1,
+  limit: number = 20,
+  searchQuery?: string,
+  statusFilter?: string,
+) {
   const from = (page - 1) * limit;
   const to = from + limit - 1;
 
-  const { data, error, count } = await supabase
+  let query = supabase
     .from("profiles")
     .select("*", { count: "exact" })
-    .eq("role", "affiliate")
+    .eq("role", "affiliate");
+
+  if (searchQuery) {
+    query = query.or(
+      `email.ilike.%${searchQuery}%,full_name.ilike.%${searchQuery}%`,
+    );
+  }
+
+  if (statusFilter && statusFilter !== "ALL") {
+    query = query.eq("status", statusFilter.toLowerCase());
+  }
+
+  const { data, error, count } = await query
     .order("created_at", { ascending: false })
     .range(from, to);
 
@@ -131,6 +148,61 @@ export async function getAffiliates(page: number = 1, limit: number = 20) {
     data: data as Profile[],
     count: count || 0,
     totalPages: Math.ceil((count || 0) / limit),
+  };
+}
+
+export async function getAdminAffiliate(id: string) {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", id)
+    .single();
+  if (error) throw error;
+  return data as Profile;
+}
+
+export async function getAdminAffiliateMetrics(id: string) {
+  const { data: wallet, error: walletError } = await supabase
+    .from("affiliate_wallets")
+    .select("*")
+    .eq("affiliate_id", id)
+    .single();
+
+  const walletData = walletError
+    ? { total_earned: 0, total_withdrawn: 0, available_balance: 0 }
+    : wallet;
+
+  const { data: links, error: linksError } = await supabase
+    .from("affiliate_links")
+    .select("id")
+    .eq("affiliate_id", id);
+
+  let totalClicks = 0;
+  let totalConversions = 0;
+
+  if (links && links.length > 0) {
+    const linkIds = links.map((l) => l.id);
+
+    // Clicks
+    const { count: clickCount } = await supabase
+      .from("affiliate_clicks")
+      .select("*", { count: "exact", head: true })
+      .in("affiliate_link_id", linkIds);
+    totalClicks = clickCount || 0;
+
+    // Conversions
+    const { count: conversionCount } = await supabase
+      .from("conversions")
+      .select("*", { count: "exact", head: true })
+      .in("affiliate_link_id", linkIds)
+      .eq("status", "approved");
+    totalConversions = conversionCount || 0;
+  }
+
+  return {
+    ...walletData,
+    total_clicks: totalClicks,
+    total_conversions: totalConversions,
   };
 }
 
@@ -376,6 +448,45 @@ export async function deletePaymentMethod(id: string) {
     .eq("affiliate_id", user.id);
 
   if (error) throw error;
+}
+
+// --- Affiliate Conversions ---
+
+export async function getAffiliateConversions(
+  page: number = 1,
+  limit: number = 20,
+) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  const { data: links } = await supabase
+    .from("affiliate_links")
+    .select("id")
+    .eq("affiliate_id", user.id);
+
+  if (!links || links.length === 0) {
+    return { data: [], count: 0, totalPages: 0 };
+  }
+
+  const linkIds = links.map((l) => l.id);
+
+  const { data, error, count } = await supabase
+    .from("conversions")
+    .select("*, product:products(name)", { count: "exact" })
+    .in("affiliate_link_id", linkIds)
+    .order("created_at", { ascending: false })
+    .range(from, to);
+
+  if (error) throw error;
+
+  return {
+    data,
+    count: count || 0,
+    totalPages: Math.ceil((count || 0) / limit),
+  };
 }
 
 // --- Tracking Functions ---
