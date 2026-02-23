@@ -42,7 +42,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
           {/* Close button could go here, but clicking overlay also works */}
         </div>
 
-        <SidebarContent />
+        <SidebarContent onLinkClick={onClose} />
       </div>
       <div className='shrink-0 w-14' aria-hidden='true'>
         {/* Dummy element to force sidebar to not take full width if we wanted, 

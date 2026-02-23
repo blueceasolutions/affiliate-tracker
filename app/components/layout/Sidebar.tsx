@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
-export function SidebarContent() {
+export function SidebarContent({ onLinkClick }: { onLinkClick?: () => void }) {
   const { user, role, signOut } = useAuth()
   const location = useLocation()
 
@@ -98,6 +98,7 @@ export function SidebarContent() {
               <Link
                 key={link.name}
                 to={link.href}
+                onClick={onLinkClick}
                 className={cn(
                   'group flex items-center rounded-lg px-3 py-2.5 text-[15px] font-medium transition-colors',
                   isActive
@@ -129,14 +130,22 @@ export function SidebarContent() {
           {/* 3. Settings Link */}
           <Link
             to={role === 'admin' ? '/admin/settings' : '/affiliate/settings'}
+            onClick={onLinkClick}
             className={cn(
               'group flex items-center rounded-lg px-3 py-2.5 text-[15px] font-medium transition-colors',
-              location.pathname === '/settings'
-                ? 'bg-brand/10 dark:bg-brand/20 text-brand dark:text-brand-muted'
-                : 'bg-slate-100/80 dark:bg-slate-800 text-brand-dark dark:text-brand-light hover:bg-slate-200 dark:hover:bg-slate-700',
+              location.pathname === '/admin/settings' ||
+                location.pathname === '/affiliate/settings'
+                ? 'text-slate-900 dark:text-slate-100'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50',
             )}>
             <Settings
-              className='mr-3 h-[18px] w-[18px] shrink-0 text-brand-dark dark:text-brand-light'
+              className={cn(
+                'mr-3 h-[18px] w-[18px] shrink-0 transition-colors',
+                location.pathname === '/admin/settings' ||
+                  location.pathname === '/affiliate/settings'
+                  ? 'text-brand dark:text-brand-muted'
+                  : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-500 dark:group-hover:text-slate-400',
+              )}
               strokeWidth={2.5}
             />
             Settings
@@ -144,7 +153,19 @@ export function SidebarContent() {
         </nav>
       </div>
 
-      {/* 4. User Profile Footer */}
+      {/* 4. Support Information */}
+      <div className='p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-center'>
+        <p className='text-xs text-slate-500 dark:text-slate-400'>
+          Need help?{' '}
+          <a
+            href='mailto:hello@bluecea.com'
+            className='text-brand dark:text-brand-light hover:underline'>
+            hello@bluecea.com
+          </a>
+        </p>
+      </div>
+
+      {/* 5. User Profile Footer */}
       <div className='p-4 mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'>
         <div className='flex items-center justify-between'>
           <div className='flex items-center gap-3 min-w-0'>

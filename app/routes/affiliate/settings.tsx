@@ -18,6 +18,7 @@ import type { PaymentMethod } from '../../types'
 
 export default function AffiliateSettings() {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null)
 
   const queryClient = useQueryClient()
@@ -147,11 +148,7 @@ export default function AffiliateSettings() {
                 action cannot be undone.
               </p>
             </div>
-            <Button
-              variant='danger'
-              onClick={() =>
-                alert('Account deletion currently requires contacting support.')
-              }>
+            <Button variant='danger' onClick={() => setIsDeleteModalOpen(true)}>
               Delete Account
             </Button>
           </div>
@@ -170,6 +167,29 @@ export default function AffiliateSettings() {
           }}
           onCancel={() => setIsModalOpen(false)}
         />
+      </Modal>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        title='Delete Account'>
+        <div className='space-y-4'>
+          <p className='text-sm text-slate-600 dark:text-slate-400'>
+            Account deletion currently requires contacting support. Please email
+            us to process your request securely.
+          </p>
+          <div className='flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800'>
+            <Button variant='ghost' onClick={() => setIsDeleteModalOpen(false)}>
+              Close
+            </Button>
+            <Button
+              onClick={() =>
+                (window.location.href = 'mailto:hello@bluecea.com')
+              }>
+              Contact Support
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   )
