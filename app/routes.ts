@@ -11,6 +11,8 @@ export default [
   route("signup", "signup.tsx"),
   route("forgot-password", "forgot-password.tsx"),
   route("reset-password", "reset-password.tsx"),
+  route("terms", "routes/terms.tsx"),
+  route("privacy", "routes/privacy.tsx"),
 
   // App / API Routes
   route("ref/:code", "routes/ref.tsx"),

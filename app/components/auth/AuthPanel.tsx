@@ -61,7 +61,7 @@ export function AuthPanel() {
 
       {/* Footer */}
       <p className='text-white/40 text-xs relative z-10'>
-        © 2024 Bluecea Inc. All rights reserved.
+        © 2026 Bluecea Inc. All rights reserved.
       </p>
     </div>
   )

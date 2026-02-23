@@ -207,7 +207,14 @@ export default function Signup() {
                   to='/terms'
                   target='_blank'
                   className='font-medium text-brand hover:text-brand-dark transition-colors'>
-                  Terms of Service and Privacy Policy
+                  Terms of Service
+                </Link>{' '}
+                and{' '}
+                <Link
+                  to='/privacy'
+                  target='_blank'
+                  className='font-medium text-brand hover:text-brand-dark transition-colors'>
+                  Privacy Policy
                 </Link>
               </label>
               {errors.acceptTerms && (

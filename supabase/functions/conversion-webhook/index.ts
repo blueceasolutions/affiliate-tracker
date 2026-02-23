@@ -64,6 +64,33 @@ app.post("/*", async (c: Context) => {
         return c.text("Self-referrals are not rewarded", 200);
       }
 
+      const cl_supabaseUrl = Deno.env.get("CL_SUPABASE_URL") || "";
+      const cl_supabaseServiceKey =
+        Deno.env.get("CL_SUPABASE_SERVICE_ROLE_KEY") ||
+        "";
+
+      const cl_supabaseAdmin = createClient(
+        cl_supabaseUrl,
+        cl_supabaseServiceKey,
+      );
+
+      const { data: cl_user, error: cl_userError } = await cl_supabaseAdmin
+        .from("users")
+        .select("is_subscribed, onboarding_completed")
+        .eq("email", customerEmail)
+        .single();
+
+      if (cl_userError || !cl_user) {
+        return c.text("User not found", 404);
+      }
+
+      if (!cl_user.is_subscribed && !cl_user.onboarding_completed) {
+        return c.text(
+          "User is not subscribed or onboarding is not completed",
+          200,
+        );
+      }
+
       const productData = Array.isArray(link.product)
         ? link.product[0]
         : link.product;

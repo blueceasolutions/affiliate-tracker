@@ -1,20 +1,25 @@
 import { useEffect, useState } from 'react'
-import { Outlet, useNavigate } from 'react-router'
+import { Outlet, useNavigate, useLocation } from 'react-router'
 import { useAuth } from '../../context/AuthContext'
 import { Sidebar } from '../../components/layout/Sidebar'
 import { Header } from '../../components/layout/Header'
 import { MobileSidebar } from '../../components/layout/MobileSidebar'
 
 export default function DashboardLayout() {
-  const { user, loading } = useAuth()
+  const { user, loading, role } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/')
+    } else if (!loading && user && role !== null) {
+      if (location.pathname.startsWith('/admin') && role !== 'admin') {
+        navigate('/dashboard')
+      }
     }
-  }, [user, loading, navigate])
+  }, [user, loading, role, navigate, location.pathname])
 
   if (loading) {
     return (
@@ -26,6 +31,7 @@ export default function DashboardLayout() {
 
   // Prevent flash of content before redirect
   if (!user) return null
+  if (location.pathname.startsWith('/admin') && role !== 'admin') return null
 
   return (
     <div className='flex h-screen bg-slate-50 dark:bg-slate-950 overflow-hidden'>
