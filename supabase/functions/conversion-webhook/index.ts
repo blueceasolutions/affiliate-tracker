@@ -42,7 +42,7 @@ app.post("/*", async (c: Context) => {
       const { data: link, error: linkError } = await supabaseAdmin
         .from("affiliate_links")
         .select(
-          "id, product_id, product:products(payout_per_conversion), profiles(email)",
+          "id, product_id, product:products(payout_per_conversion), profiles(email, status)",
         )
         .eq("id", affiliateLinkId)
         .single();
@@ -51,11 +51,16 @@ app.post("/*", async (c: Context) => {
         return c.text("Invalid affiliate link", 400);
       }
 
-      // Check for self-referral
+      // Check for self-referral and active profile status
       const affiliateProfile = Array.isArray(link.profiles)
         ? link.profiles[0]
         : link.profiles;
       const affiliateEmail = affiliateProfile?.email;
+      const affiliateStatus = affiliateProfile?.status;
+
+      if (affiliateStatus !== "active") {
+        return c.text("Affiliate profile is not active", 200);
+      }
 
       if (
         affiliateEmail && customerEmail &&

@@ -99,12 +99,25 @@ CREATE TABLE public.admin_notifications (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- AFFILIATE NOTIFICATIONS
+CREATE TABLE public.affiliate_notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  affiliate_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  is_read BOOLEAN DEFAULT FALSE,
+  metadata JSONB DEFAULT '{}'::JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Indexes
 CREATE INDEX idx_affiliate_clicks_link ON public.affiliate_clicks(affiliate_link_id);
 CREATE INDEX idx_conversions_link ON public.conversions(affiliate_link_id);
 CREATE INDEX idx_conversions_status ON public.conversions(status);
 CREATE INDEX idx_withdrawal_requests_affiliate ON public.withdrawal_requests(affiliate_id);
 CREATE INDEX idx_payment_methods_affiliate ON public.payment_methods(affiliate_id);
+CREATE INDEX idx_affiliate_notifications_affiliate ON public.affiliate_notifications(affiliate_id);
 
 -- Wallet Logic Function
 CREATE OR REPLACE FUNCTION update_wallet_on_conversion()
@@ -122,6 +135,16 @@ BEGIN
       total_earned = affiliate_wallets.total_earned + EXCLUDED.total_earned,
       available_balance = affiliate_wallets.available_balance + EXCLUDED.available_balance,
       updated_at = NOW();
+
+    -- Notify affiliate of conversion
+    INSERT INTO public.affiliate_notifications (affiliate_id, title, message, metadata)
+    SELECT 
+      al.affiliate_id,
+      'New Conversion Recorded!',
+      'You earned $' || NEW.payout_amount || ' from a successful conversion.',
+      jsonb_build_object('conversion_id', NEW.id, 'amount', NEW.payout_amount)
+    FROM public.affiliate_links al
+    WHERE al.id = NEW.affiliate_link_id;
   END IF;
   RETURN NEW;
 END;
@@ -179,6 +202,10 @@ BEGIN
       total_withdrawn = total_withdrawn + NEW.amount,
       updated_at = NOW()
     WHERE affiliate_id = NEW.affiliate_id;
+
+    -- Notify affiliate
+    INSERT INTO public.affiliate_notifications (affiliate_id, title, message, metadata)
+    VALUES (NEW.affiliate_id, 'Withdrawal Processed', 'Your withdrawal request for $' || NEW.amount || ' has been successfully paid out.', jsonb_build_object('withdrawal_id', NEW.id, 'amount', NEW.amount, 'status', 'paid'));
   END IF;
 
   -- If rejected, add the amount back to available_balance
@@ -188,6 +215,10 @@ BEGIN
       available_balance = available_balance + NEW.amount,
       updated_at = NOW()
     WHERE affiliate_id = NEW.affiliate_id;
+
+    -- Notify affiliate
+    INSERT INTO public.affiliate_notifications (affiliate_id, title, message, metadata)
+    VALUES (NEW.affiliate_id, 'Withdrawal Rejected', 'Your withdrawal request for $' || NEW.amount || ' was rejected and the funds have been returned to your balance.', jsonb_build_object('withdrawal_id', NEW.id, 'amount', NEW.amount, 'status', 'rejected'));
   END IF;
   
   RETURN NEW;
@@ -403,3 +434,26 @@ CREATE POLICY "Admins can update notifications."
   USING ( public.is_admin() );
 
 -- Note: Insert happens via the database trigger (security definer) which bypasses RLS
+
+-- 10. affiliate_notifications
+ALTER TABLE public.affiliate_notifications ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Affiliates view own notifications."
+  ON public.affiliate_notifications FOR SELECT
+  USING ( auth.uid() = affiliate_id );
+
+CREATE POLICY "Affiliates can update own notifications."
+  ON public.affiliate_notifications FOR UPDATE
+  USING ( auth.uid() = affiliate_id );
+
+CREATE POLICY "Admins view all affiliate notifications."
+  ON public.affiliate_notifications FOR SELECT
+  USING ( public.is_admin() );
+
+CREATE POLICY "Admins can update all affiliate notifications."
+  ON public.affiliate_notifications FOR UPDATE
+  USING ( public.is_admin() );
+
+CREATE POLICY "Admins can insert affiliate notifications."
+  ON public.affiliate_notifications FOR INSERT
+  WITH CHECK ( public.is_admin() );

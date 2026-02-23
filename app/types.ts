@@ -77,3 +77,14 @@ export interface PaymentMethod {
   created_at: string;
   updated_at: string;
 }
+
+export interface AffiliateNotification {
+  id: string;
+  affiliate_id: string;
+  title: string;
+  message: string;
+  is_read: boolean;
+  metadata: any;
+  created_at: string;
+  updated_at: string;
+}

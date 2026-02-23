@@ -65,16 +65,40 @@ export async function getAdminPendingCounts() {
   };
 }
 
-export async function getAllWithdrawalRequests() {
-  const { data, error } = await supabase
+export async function getAllWithdrawalRequests(
+  page: number = 1,
+  limit: number = 20,
+  emailFilter?: string,
+  statusFilter?: string,
+) {
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
+
+  let query = supabase
     .from("withdrawal_requests")
-    .select("*, profile:profiles(full_name, email)")
-    .order("requested_at", { ascending: false });
+    .select("*, profile:profiles!inner(full_name, email)", { count: "exact" });
+
+  if (emailFilter) {
+    query = query.ilike("profile.email", `%${emailFilter}%`);
+  }
+
+  if (statusFilter && statusFilter !== "ALL") {
+    query = query.eq("status", statusFilter.toLowerCase());
+  }
+
+  const { data, count, error } = await query
+    .order("requested_at", { ascending: false })
+    .range(from, to);
 
   if (error) throw error;
-  return data as (WithdrawalRequest & {
-    profile: { full_name: string; email: string };
-  })[];
+
+  return {
+    data: data as (WithdrawalRequest & {
+      profile: { full_name: string; email: string };
+    })[],
+    count: count || 0,
+    totalPages: Math.ceil((count || 0) / limit),
+  };
 }
 
 export async function updateWithdrawalStatus(id: string, status: string) {
@@ -413,4 +437,32 @@ export async function recordConversion(
 
   if (error) throw error;
   return data;
+}
+
+// --- Notifications ---
+
+export async function getUnreadNotifications() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("affiliate_notifications")
+    .select("*")
+    .eq("affiliate_id", user.id)
+    .eq("is_read", false)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data as import("../types").AffiliateNotification[];
+}
+
+export async function markNotificationAsRead(id: string) {
+  const { error } = await supabase
+    .from("affiliate_notifications")
+    .update({ is_read: true, updated_at: new Date().toISOString() })
+    .eq("id", id);
+
+  if (error) throw error;
 }

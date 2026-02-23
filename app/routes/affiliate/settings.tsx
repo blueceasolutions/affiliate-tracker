@@ -90,7 +90,7 @@ export default function AffiliateSettings() {
                   <div className='p-2 bg-slate-100 dark:bg-slate-800 rounded-lg'>
                     <CreditCard className='h-5 w-5 text-slate-700 dark:text-slate-300' />
                   </div>
-                  <div className='flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity'>
+                  <div className='flex z-30 space-x-2 opacity-0 group-hover:opacity-100 transition-opacity'>
                     <button
                       onClick={() => handleEdit(method)}
                       className='text-slate-400 hover:text-blue-500 transition-colors'

@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { Sidebar } from '../../components/layout/Sidebar'
 import { Header } from '../../components/layout/Header'
 import { MobileSidebar } from '../../components/layout/MobileSidebar'
+import { AlertBanner } from '../../components/layout/AlertBanner'
 
 export default function DashboardLayout() {
   const { user, loading, role } = useAuth()
@@ -41,6 +42,7 @@ export default function DashboardLayout() {
         onClose={() => setIsSidebarOpen(false)}
       />
       <div className='flex flex-1 flex-col overflow-hidden'>
+        <AlertBanner />
         <Header onMenuClick={() => setIsSidebarOpen(true)} />
         <main className='flex-1 overflow-y-auto p-6'>
           <Outlet />
