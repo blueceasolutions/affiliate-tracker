@@ -13,7 +13,7 @@ import {
 import { createPaymentMethodMutation } from '../../api/mutations/createPaymentMethod'
 import { updatePaymentMethodMutation } from '../../api/mutations/updatePaymentMethod'
 import { deletePaymentMethodMutation } from '../../api/mutations/deletePaymentMethod'
-import { CreditCard, Plus, Trash2, Edit2, ShieldAlert } from 'lucide-react'
+import { CreditCard, Plus, Edit2, ShieldAlert } from 'lucide-react'
 import type { PaymentMethod } from '../../types'
 
 export default function AffiliateSettings() {
@@ -86,6 +86,7 @@ export default function AffiliateSettings() {
             paymentMethods.map((method) => (
               <div
                 key={method.id}
+                onClick={() => handleEdit(method)}
                 className='group relative rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm hover:shadow-md transition-all duration-200'>
                 <div className='flex justify-between items-start mb-4'>
                   <div className='p-2 bg-slate-100 dark:bg-slate-800 rounded-lg'>
@@ -98,12 +99,12 @@ export default function AffiliateSettings() {
                       title='Edit'>
                       <Edit2 className='h-4 w-4' />
                     </button>
-                    <button
+                    {/* <button
                       onClick={() => handleDelete(method.id)}
                       className='text-slate-400 hover:text-red-500 transition-colors'
                       title='Delete'>
                       <Trash2 className='h-4 w-4' />
-                    </button>
+                    </button> */}
                   </div>
                 </div>
 
@@ -112,8 +113,6 @@ export default function AffiliateSettings() {
                 </h3>
 
                 <div className='text-sm text-slate-500 dark:text-slate-400 truncate'>
-                  {method.type === 'paypal' &&
-                    (method.details.email || 'No email')}
                   {method.type === 'bank' &&
                     (method.details.account_number || 'No account number')}
                   {method.type === 'crypto' &&
@@ -197,7 +196,7 @@ export default function AffiliateSettings() {
 
 const paymentMethodSchema = z.object({
   currency: z.enum(['USD', 'NGN']),
-  type: z.enum(['paypal', 'bank', 'crypto']),
+  type: z.enum(['bank', 'crypto']),
   details: z.any(),
   is_default: z.boolean().default(false),
 })
@@ -217,6 +216,7 @@ function PaymentMethodForm({
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<PaymentMethodFormValues>({
     resolver: zodResolver(
@@ -224,7 +224,7 @@ function PaymentMethodForm({
     ) as Resolver<PaymentMethodFormValues>,
     defaultValues: initialData || {
       currency: 'USD',
-      type: 'paypal',
+      type: 'bank',
       is_default: false,
       details: {},
     },
@@ -243,9 +243,7 @@ function PaymentMethodForm({
   const onSubmit = (data: PaymentMethodFormValues) => {
     // Basic formatting for details based on type
     let finalDetails = {}
-    if (data.type === 'paypal') {
-      finalDetails = { email: data.details.email }
-    } else if (data.type === 'crypto') {
+    if (data.type === 'crypto') {
       finalDetails = {
         address: data.details.address,
         network: data.details.network,
@@ -285,7 +283,13 @@ function PaymentMethodForm({
           </label>
           <select
             className='flex w-full rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 transition-colors'
-            {...register('currency')}>
+            {...register('currency', {
+              onChange: (e) => {
+                if (e.target.value === 'NGN' && selectedType === 'crypto') {
+                  setValue('type', 'bank')
+                }
+              },
+            })}>
             <option value='USD'>USD</option>
             <option value='NGN'>NGN</option>
           </select>
@@ -300,9 +304,6 @@ function PaymentMethodForm({
             {...register('type')}>
             <option value='bank'>Bank Transfer</option>
             {selectedCurrency === 'USD' && (
-              <option value='paypal'>PayPal</option>
-            )}
-            {selectedCurrency === 'USD' && (
               <option value='crypto'>Crypto</option>
             )}
           </select>
@@ -310,20 +311,6 @@ function PaymentMethodForm({
       </div>
 
       <div className='space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800'>
-        {selectedType === 'paypal' && (
-          <div>
-            <label className='block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1'>
-              PayPal Email
-            </label>
-            <Input
-              type='email'
-              placeholder='you@example.com'
-              {...register('details.email')}
-              defaultValue={initialData?.details?.email}
-            />
-          </div>
-        )}
-
         {selectedType === 'crypto' && (
           <>
             <div>

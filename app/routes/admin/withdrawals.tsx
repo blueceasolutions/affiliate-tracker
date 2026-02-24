@@ -58,7 +58,6 @@ export default function WithdrawalsPage() {
 
   const formatDetailsPreview = (req: any) => {
     if (!req.payment_details) return '-'
-    if (req.payment_method === 'paypal') return req.payment_details.email || '-'
     if (req.payment_method === 'bank')
       return `${req.payment_details.bank_name || ''} - ${req.payment_details.account_number || ''}`
     if (req.payment_method === 'crypto')

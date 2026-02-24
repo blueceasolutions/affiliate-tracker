@@ -71,7 +71,7 @@ export interface PaymentMethod {
   id: string;
   affiliate_id: string;
   currency: "USD" | "NGN";
-  type: "bank" | "paypal" | "crypto";
+  type: "bank" | "crypto";
   details: any;
   is_default: boolean;
   created_at: string;

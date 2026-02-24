@@ -38,7 +38,7 @@ export default function AffiliateWallet() {
 
   return (
     <div className='space-y-6'>
-      <div className='flex items-center justify-between'>
+      <div className='flex flex-wrap gap-4 items-center justify-between'>
         <div>
           <h1 className='text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50'>
             Wallet
@@ -370,11 +370,9 @@ function WithdrawalForm({
         <div className='space-y-2 max-h-[240px] overflow-y-auto p-1'>
           {paymentMethods.map((method) => {
             const detailPreview =
-              method.type === 'paypal'
-                ? method.details.email
-                : method.type === 'bank'
-                  ? method.details.account_number
-                  : method.details.address
+              method.type === 'bank'
+                ? method.details.account_number
+                : method.details.address
             return (
               <label
                 key={method.id}
@@ -390,7 +388,7 @@ function WithdrawalForm({
                   <span className='text-sm font-medium text-slate-900 dark:text-slate-50 uppercase'>
                     {method.type} ({method.currency})
                   </span>
-                  <span className='text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]'>
+                  <span className='text-xs text-slate-500 dark:text-slate-400 break-all'>
                     {detailPreview}
                   </span>
                 </div>

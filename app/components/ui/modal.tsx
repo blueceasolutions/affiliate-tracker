@@ -40,7 +40,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         ref={overlayRef}
       />
 
-      <div className='relative transform overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg'>
+      <div className='relative transform overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-left shadow-xl transition-all w-full max-w-sm sm:max-w-lg'>
         <div className='bg-white dark:bg-slate-900 px-4 pb-4 pt-5 sm:p-6 sm:pb-4'>
           <div className='flex items-center justify-between mb-4'>
             <h3

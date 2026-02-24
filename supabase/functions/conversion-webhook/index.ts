@@ -81,8 +81,8 @@ app.post("/*", async (c: Context) => {
 
       const { data: cl_user, error: cl_userError } = await cl_supabaseAdmin
         .from("users")
-        .select("is_subscribed, onboarding_completed")
-        .eq("email", customerEmail)
+        .select("*")
+        .eq("email", affiliateEmail)
         .single();
 
       if (cl_userError || !cl_user) {
