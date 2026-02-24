@@ -26,9 +26,14 @@ export default function WithdrawalsPage() {
     return () => clearTimeout(timer)
   }, [emailFilter])
 
+  // Handle API fetching with React Query
   const [selectedDetails, setSelectedDetails] = useState<any>(null)
 
-  // Handle API fetching with React Query
+  // Confirmation Modal State
+  const [confirmAction, setConfirmAction] = useState<{
+    id: string
+    newStatus: string
+  } | null>(null)
   const { data: qData, isLoading } = useQuery(
     adminWithdrawalsQuery(page, limit, debouncedEmail, statusFilter),
   )
@@ -48,6 +53,7 @@ export default function WithdrawalsPage() {
 
   const handleStatusUpdate = (id: string, newStatus: string) => {
     updateStatusMutation.mutate({ id, status: newStatus })
+    setConfirmAction(null)
   }
 
   const formatDetailsPreview = (req: any) => {
@@ -240,7 +246,12 @@ export default function WithdrawalsPage() {
                               size='sm'
                               variant='outline'
                               className='text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200'
-                              onClick={() => handleStatusUpdate(req.id, 'paid')}
+                              onClick={() =>
+                                setConfirmAction({
+                                  id: req.id,
+                                  newStatus: 'paid',
+                                })
+                              }
                               title='Mark as Paid'>
                               <DollarSign className='h-4 w-4' />
                             </Button>
@@ -249,7 +260,10 @@ export default function WithdrawalsPage() {
                               variant='outline'
                               className='text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200'
                               onClick={() =>
-                                handleStatusUpdate(req.id, 'rejected')
+                                setConfirmAction({
+                                  id: req.id,
+                                  newStatus: 'rejected',
+                                })
                               }
                               title='Reject'>
                               <X className='h-4 w-4' />
@@ -325,6 +339,43 @@ export default function WithdrawalsPage() {
           </div>
           <div className='flex justify-end pt-2'>
             <Button onClick={() => setSelectedDetails(null)}>Done</Button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={!!confirmAction}
+        onClose={() => setConfirmAction(null)}
+        title={
+          confirmAction?.newStatus === 'paid'
+            ? 'Confirm Payment'
+            : 'Reject Withdrawal'
+        }>
+        <div className='space-y-4'>
+          <p className='text-sm text-slate-600 dark:text-slate-400'>
+            {confirmAction?.newStatus === 'paid'
+              ? 'Are you sure you want to mark this withdrawal request as paid? This confirms that the affiliate has received their funds.'
+              : 'Are you sure you want to reject this withdrawal request? It will be marked as canceled.'}
+          </p>
+          <div className='flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800'>
+            <Button
+              variant='ghost'
+              onClick={() => setConfirmAction(null)}
+              disabled={updateStatusMutation.isPending}>
+              Cancel
+            </Button>
+            <Button
+              variant={
+                confirmAction?.newStatus === 'paid' ? 'primary' : 'danger'
+              }
+              onClick={() =>
+                handleStatusUpdate(confirmAction!.id, confirmAction!.newStatus)
+              }
+              isLoading={updateStatusMutation.isPending}>
+              {confirmAction?.newStatus === 'paid'
+                ? 'Yes, Mark as Paid'
+                : 'Yes, Reject'}
+            </Button>
           </div>
         </div>
       </Modal>

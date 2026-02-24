@@ -68,6 +68,27 @@ export default function Login() {
         {/* Google SSO */}
         <GoogleSignInButton />
 
+        <div className='mt-4 text-sm'>
+          <label
+            htmlFor='acceptTerms'
+            className='text-slate-500 dark:text-slate-400 cursor-pointer leading-relaxed'>
+            By signing up, you agree to the{' '}
+            <Link
+              to='/terms'
+              target='_blank'
+              className='font-medium text-slate-900 dark:text-slate-200 hover:text-slate-700 dark:hover:text-slate-50 transition-colors underline underline-offset-4'>
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link
+              to='/privacy'
+              target='_blank'
+              className='font-medium text-slate-900 dark:text-slate-200 hover:text-slate-700 dark:hover:text-slate-50 transition-colors underline underline-offset-4'>
+              Privacy Policy
+            </Link>
+          </label>
+        </div>
+
         {/* Divider */}
         <div className='my-6 hidden'>
           <FormDivider />

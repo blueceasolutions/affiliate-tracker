@@ -89,7 +89,7 @@ app.post("/*", async (c: Context) => {
         return c.text("User not found", 404);
       }
 
-      if (!cl_user.is_subscribed && !cl_user.onboarding_completed) {
+      if (!cl_user.is_subscribed || !cl_user.onboarding_completed) {
         return c.text(
           "User is not subscribed or onboarding is not completed",
           200,
