@@ -103,7 +103,6 @@ export default function WithdrawalsPage() {
               }}>
               <option value='ALL'>All Statuses</option>
               <option value='pending'>Pending</option>
-              <option value='approved'>Approved</option>
               <option value='paid'>Paid</option>
               <option value='rejected'>Rejected</option>
             </select>

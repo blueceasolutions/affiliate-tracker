@@ -8,7 +8,7 @@ import {
 export default [
   // Public / Auth Routes
   index("home.tsx"),
-  route("signup", "signup.tsx"),
+  // route("signup", "signup.tsx"),
   route("forgot-password", "forgot-password.tsx"),
   route("reset-password", "reset-password.tsx"),
   route("terms", "routes/terms.tsx"),
@@ -32,4 +32,7 @@ export default [
     route("admin/affiliates/:id", "routes/admin/affiliates.$id.tsx"),
     route("admin/settings", "routes/admin/settings.tsx"),
   ]),
+
+  // Catch-all for 404
+  route("*", "not-found.tsx"),
 ] satisfies RouteConfig;

@@ -58,10 +58,10 @@ export default function Login() {
         {/* Heading */}
         <div className='mb-8'>
           <h2 className='text-3xl font-bold text-slate-900 dark:text-slate-50 mb-1'>
-            Welcome back
+            Continue to dashboard
           </h2>
           <p className='text-sm text-slate-500 dark:text-slate-400'>
-            Please enter your details to sign in.
+            Please sign in to continue.
           </p>
         </div>
 
@@ -69,12 +69,12 @@ export default function Login() {
         <GoogleSignInButton />
 
         {/* Divider */}
-        <div className='my-6'>
+        <div className='my-6 hidden'>
           <FormDivider />
         </div>
 
         {/* Email / Password form */}
-        <form className='space-y-4' onSubmit={handleSubmit(onSubmit)}>
+        <form className='space-y-4 hidden' onSubmit={handleSubmit(onSubmit)}>
           {/* Email */}
           <div>
             <label
@@ -186,7 +186,7 @@ export default function Login() {
         </form>
 
         {/* Sign up CTA */}
-        <p className='mt-6 text-center text-sm text-slate-600 dark:text-slate-400'>
+        <p className='mt-6 text-center text-sm text-slate-600 dark:text-slate-400 hidden'>
           Don't have an account?{' '}
           <Link
             to='/signup'

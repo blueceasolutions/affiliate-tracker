@@ -7,6 +7,9 @@ import {
 import { markNotificationAsRead } from '../../lib/api'
 import type { AffiliateNotification } from '../../types'
 import { X, Bell } from 'lucide-react'
+import { walletKey } from '~/api/queries/wallet'
+import { withdrawalsKey } from '~/api/queries/withdrawals'
+import { affiliateConversionsKey } from '~/api/queries/affiliateConversions'
 
 export function AlertBanner() {
   const queryClient = useQueryClient()
@@ -28,6 +31,9 @@ export function AlertBanner() {
     mutationFn: (id: string) => markNotificationAsRead(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [unreadNotificationsKey] })
+      queryClient.invalidateQueries({ queryKey: [walletKey] })
+      queryClient.invalidateQueries({ queryKey: [withdrawalsKey] })
+      queryClient.invalidateQueries({ queryKey: [affiliateConversionsKey] })
     },
   })
 

@@ -75,7 +75,7 @@ export default function Signup() {
         {/* Heading */}
         <div className='mb-8'>
           <h2 className='text-3xl font-bold text-slate-900 dark:text-slate-50 mb-1'>
-            Create an account
+            Contiune to dashboard
           </h2>
           <p className='text-sm text-slate-500 dark:text-slate-400'>
             Join the Bluecea Affiliate Network today.
@@ -88,12 +88,12 @@ export default function Signup() {
         />
 
         {/* Divider */}
-        <div className='my-6'>
+        <div className='my-6 hidden'>
           <FormDivider label='or sign up with email' />
         </div>
 
         {/* Form */}
-        <form className='space-y-4' onSubmit={handleSubmit(onSubmit)}>
+        <form className='space-y-4 hidden' onSubmit={handleSubmit(onSubmit)}>
           {/* Full name */}
           <div>
             <label
@@ -235,7 +235,7 @@ export default function Signup() {
         </form>
 
         {/* Sign in CTA */}
-        <p className='mt-6 text-center text-sm text-slate-600 dark:text-slate-400'>
+        <p className='mt-6 text-center text-sm text-slate-600 dark:text-slate-400 hidden'>
           Already have an account?{' '}
           <Link
             to='/'
