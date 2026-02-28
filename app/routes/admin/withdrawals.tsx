@@ -195,8 +195,27 @@ export default function WithdrawalsPage() {
                           {req.profile?.email}
                         </div>
                       </td>
-                      <td className='whitespace-nowrap px-6 py-4 text-sm font-bold text-slate-900 dark:text-slate-50'>
-                        ${req.amount.toFixed(2)}
+                      <td className='whitespace-nowrap px-6 py-4'>
+                        {req.payment_details?.converted_amount_ngn ? (
+                          <div className='flex flex-col'>
+                            <span className='text-sm font-bold text-slate-900 dark:text-slate-50'>
+                              ₦
+                              {req.payment_details.converted_amount_ngn.toLocaleString()}
+                            </span>
+                            <span className='text-xs font-medium text-slate-500 dark:text-slate-400'>
+                              ${req.amount.toFixed(2)} USD
+                            </span>
+                          </div>
+                        ) : (
+                          <div className='flex flex-col'>
+                            <span className='text-sm font-bold text-slate-900 dark:text-slate-50'>
+                              ${req.amount.toFixed(2)}
+                            </span>
+                            <span className='text-xs font-medium text-slate-500 dark:text-slate-400'>
+                              USD
+                            </span>
+                          </div>
+                        )}
                       </td>
                       <td className='px-6 py-4'>
                         <div className='flex items-center gap-2'>
@@ -214,6 +233,7 @@ export default function WithdrawalsPage() {
                               setSelectedDetails({
                                 ...req.payment_details,
                                 method: req.payment_method,
+                                originalAmount: req.amount,
                               })
                             }>
                             <Eye className='h-4 w-4 text-slate-400' />
@@ -316,6 +336,38 @@ export default function WithdrawalsPage() {
         onClose={() => setSelectedDetails(null)}
         title='Payment Details'>
         <div className='space-y-4'>
+          {/* Bold Amount Display */}
+          <div className='bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800/50'>
+            <p className='text-sm text-blue-600 dark:text-blue-400 font-medium mb-1'>
+              Required Payout Amount
+            </p>
+            {selectedDetails?.converted_amount_ngn ? (
+              <div className='flex items-baseline gap-2'>
+                <span className='text-3xl font-bold text-blue-700 dark:text-blue-300'>
+                  ₦{selectedDetails.converted_amount_ngn.toLocaleString()}
+                </span>
+                <span className='text-sm text-blue-600/70 dark:text-blue-400/70 font-medium'>
+                  (${selectedDetails.originalAmount?.toFixed(2)} USD)
+                </span>
+              </div>
+            ) : (
+              <div className='flex items-baseline gap-2'>
+                <span className='text-3xl font-bold text-blue-700 dark:text-blue-300'>
+                  ${selectedDetails?.originalAmount?.toFixed(2)}
+                </span>
+                <span className='text-sm text-blue-600/70 dark:text-blue-400/70 font-medium'>
+                  USD
+                </span>
+              </div>
+            )}
+            {selectedDetails?.exchange_rate_used && (
+              <p className='text-xs text-blue-500/80 dark:text-blue-400/60 mt-2'>
+                Exchange Rate: $1 = ₦
+                {selectedDetails.exchange_rate_used.toLocaleString()}
+              </p>
+            )}
+          </div>
+
           <div className='bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg'>
             <h4 className='text-sm font-semibold capitalize mb-4 text-slate-900 dark:text-slate-50 border-b border-slate-200 dark:border-slate-700 pb-2'>
               {selectedDetails?.method} Details
@@ -323,7 +375,13 @@ export default function WithdrawalsPage() {
             <div className='space-y-3'>
               {selectedDetails &&
                 Object.entries(selectedDetails)
-                  .filter(([k]) => k !== 'method')
+                  .filter(
+                    ([k]) =>
+                      k !== 'method' &&
+                      k !== 'originalAmount' &&
+                      k !== 'converted_amount_ngn' &&
+                      k !== 'exchange_rate_used',
+                  )
                   .map(([key, value]) => (
                     <div key={key} className='flex flex-col'>
                       <span className='text-xs font-medium text-slate-500 dark:text-slate-400 capitalize bg-transparent mb-0.5'>
