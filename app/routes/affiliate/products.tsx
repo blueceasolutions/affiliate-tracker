@@ -111,10 +111,10 @@ function ProductCard({ product }: { product: Product }) {
 
       <div className='my-4'>
         <div className='text-sm font-medium text-slate-900 dark:text-slate-50'>
-          Payout
+          Commission
         </div>
         <div className='text-2xl font-bold text-blue-600'>
-          ${product.payout_per_conversion.toFixed(2)}
+          {product.payout_per_conversion}%
         </div>
         <div className='text-xs text-slate-500 dark:text-slate-400'>
           per conversion

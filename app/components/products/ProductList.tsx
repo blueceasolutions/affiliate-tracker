@@ -45,7 +45,7 @@ export function ProductList({ products, isLoading, onEdit }: ProductListProps) {
             <th
               scope='col'
               className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400'>
-              Payout
+              Commission
             </th>
             <th
               scope='col'
@@ -69,7 +69,7 @@ export function ProductList({ products, isLoading, onEdit }: ProductListProps) {
                 </div>
               </td>
               <td className='whitespace-nowrap px-6 py-4 text-sm text-slate-500 dark:text-slate-400'>
-                ${product.payout_per_conversion.toFixed(2)}
+                {product.payout_per_conversion}%
               </td>
               <td className='whitespace-nowrap px-6 py-4'>
                 <span

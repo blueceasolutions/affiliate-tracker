@@ -111,6 +111,18 @@ CREATE TABLE public.affiliate_notifications (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- SETTINGS
+CREATE TABLE public.settings (
+  key TEXT PRIMARY KEY,
+  value JSONB NOT NULL,
+  description TEXT,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Insert default exchange rate
+INSERT INTO public.settings (key, value, description)
+VALUES ('usd_to_ngn_rate', '1250'::jsonb, 'Exchange rate for USD to NGN');
+
 -- Indexes
 CREATE INDEX idx_affiliate_clicks_link ON public.affiliate_clicks(affiliate_link_id);
 CREATE INDEX idx_conversions_link ON public.conversions(affiliate_link_id);
@@ -457,3 +469,14 @@ CREATE POLICY "Admins can update all affiliate notifications."
 CREATE POLICY "Admins can insert affiliate notifications."
   ON public.affiliate_notifications FOR INSERT
   WITH CHECK ( public.is_admin() );
+
+-- 11. settings
+ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Settings are viewable by everyone."
+  ON public.settings FOR SELECT
+  USING ( true );
+
+CREATE POLICY "Admins can update settings."
+  ON public.settings FOR UPDATE
+  USING ( public.is_admin() );

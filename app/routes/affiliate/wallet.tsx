@@ -9,6 +9,7 @@ import { Modal } from '../../components/ui/modal'
 import { walletQuery, walletKey } from '../../api/queries/wallet'
 import { withdrawalsQuery, withdrawalsKey } from '../../api/queries/withdrawals'
 import { paymentMethodsQuery } from '../../api/queries/paymentMethods'
+import { exchangeRateQuery } from '../../api/queries/exchangeRate'
 import { requestWithdrawalMutation } from '../../api/mutations/requestWithdrawal'
 import { useNavigate } from 'react-router'
 import {
@@ -274,6 +275,7 @@ function WithdrawalForm({
   const navigate = useNavigate()
 
   const { data: paymentMethods = [], isLoading } = useQuery(paymentMethodsQuery)
+  const { data: exchangeRate = 1250 } = useQuery(exchangeRateQuery)
 
   // Pre-select default payment method if it exists
   const defaultMethod = paymentMethods.find((m) => m.is_default)
@@ -281,6 +283,7 @@ function WithdrawalForm({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<WithdrawalFormValues>({
     resolver: zodResolver(withdrawalSchema) as Resolver<WithdrawalFormValues>,
@@ -307,12 +310,23 @@ function WithdrawalForm({
       return
     }
 
+    const isNgn = selectedMethod.currency === 'NGN'
+    const convertedAmountNgn = isNgn ? data.amount * exchangeRate : undefined
+
     mutation.mutate({
       amount: data.amount,
       method: selectedMethod.type,
       details: selectedMethod.details,
+      exchangeRate: isNgn ? exchangeRate : undefined,
+      convertedAmountNgn,
     })
   }
+
+  const amountVal = watch('amount') || 0
+  const paymentMethodIdVal = watch('payment_method_id')
+  const selectedMethodDef =
+    paymentMethods.find((m) => m.id === paymentMethodIdVal) || defaultMethod
+  const isNgnSelected = selectedMethodDef?.currency === 'NGN'
 
   if (isLoading) {
     return (
@@ -361,6 +375,19 @@ function WithdrawalForm({
           <span>Min: $10.00</span>
           <span>Max: ${maxAmount.toFixed(2)}</span>
         </div>
+        {isNgnSelected && amountVal > 0 && (
+          <div className='mt-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-sm text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700/50'>
+            <div className='flex items-center justify-between'>
+              <span>Equivalent Amount:</span>
+              <span className='font-bold text-slate-900 dark:text-slate-50'>
+                ₦{(amountVal * exchangeRate).toLocaleString()}
+              </span>
+            </div>
+            <p className='text-xs mt-1 text-slate-400 dark:text-slate-500'>
+              Current exchange rate: $1 = ₦{exchangeRate.toLocaleString()}
+            </p>
+          </div>
+        )}
       </div>
 
       <div>

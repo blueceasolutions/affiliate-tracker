@@ -88,3 +88,10 @@ export interface AffiliateNotification {
   created_at: string;
   updated_at: string;
 }
+
+export interface Setting {
+  key: string;
+  value: any;
+  description: string | null;
+  updated_at: string;
+}

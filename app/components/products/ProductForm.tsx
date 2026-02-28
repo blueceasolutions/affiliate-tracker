@@ -12,7 +12,8 @@ const productSchema = z.object({
   url: z.string().url('Must be a valid URL'),
   payout_per_conversion: z.coerce
     .number()
-    .min(0.01, 'Payout must be greater than 0'),
+    .min(0, 'Percentage must be at least 0')
+    .max(30, 'Percentage cannot exceed 30'),
   is_affiliate_enabled: z.boolean().default(true),
 })
 
@@ -72,7 +73,7 @@ export function ProductForm({
       <div>
         <label
           htmlFor='name'
-          className='block text-sm font-medium text-slate-700 dark:text-slate-300'>
+          className='block text-sm font-medium text-slate-700 dark:text-slate-300 pb-2'>
           Product Name
         </label>
         <Input
@@ -89,7 +90,7 @@ export function ProductForm({
       <div>
         <label
           htmlFor='description'
-          className='block text-sm font-medium text-slate-700 dark:text-slate-300'>
+          className='block text-sm font-medium text-slate-700 dark:text-slate-300 pb-2'>
           Description
         </label>
         <textarea
@@ -109,7 +110,7 @@ export function ProductForm({
       <div>
         <label
           htmlFor='url'
-          className='block text-sm font-medium text-slate-700 dark:text-slate-300'>
+          className='block text-sm font-medium text-slate-700 dark:text-slate-300 pb-2'>
           Product URL
         </label>
         <Input
@@ -127,14 +128,16 @@ export function ProductForm({
       <div>
         <label
           htmlFor='payout'
-          className='block text-sm font-medium text-slate-700 dark:text-slate-300'>
-          Payout per Conversion ($)
+          className='block text-sm font-medium text-slate-700 dark:text-slate-300 pb-2'>
+          Commission Percentage (%)
         </label>
         <Input
           id='payout'
           type='number'
           step='0.01'
           placeholder='0.00'
+          max={30}
+          min={0}
           className={errors.payout_per_conversion ? 'border-red-500' : ''}
           {...register('payout_per_conversion')}
         />

@@ -18,9 +18,15 @@ app.post("/*", async (c: Context) => {
   try {
     const payload = await c.req.json().catch(() => ({}));
 
-    if (payload.event === "charge.success") {
+    if (
+      payload.event === "charge.success" ||
+      payload.event === "subscription.create"
+    ) {
       const data = payload.data;
       const customerEmail = data.customer?.email;
+      const rawAmount = data.amount || 0;
+      const currency = data.currency || data.plan?.currency || "NGN";
+      const actualAmount = rawAmount / 100;
 
       const customFields = data.metadata?.custom_fields || [];
 
@@ -99,7 +105,27 @@ app.post("/*", async (c: Context) => {
       const productData = Array.isArray(link.product)
         ? link.product[0]
         : link.product;
-      const payoutAmount = productData?.payout_per_conversion || 0;
+      const commissionPercentage = productData?.payout_per_conversion || 0;
+
+      // Fetch dynamic exchange rate
+      const { data: rawRateData } = await supabaseAdmin
+        .from("settings")
+        .select("value")
+        .eq("key", "usd_to_ngn_rate")
+        .single();
+
+      const exchangeRate = rawRateData ? Number(rawRateData.value) : 1250;
+
+      let amountInUsd = actualAmount;
+      if (currency === "NGN") {
+        amountInUsd = actualAmount / exchangeRate;
+      }
+
+      // Deduct 4% processing fee
+      const amountAfterFees = amountInUsd * 0.96;
+
+      // Calculate final commission based on product's set percentage
+      const payoutAmount = amountAfterFees * (commissionPercentage / 100);
 
       const { data: existingConversions } = await supabaseAdmin
         .from("conversions")

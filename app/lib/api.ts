@@ -365,11 +365,19 @@ export async function requestWithdrawal(
   amount: number,
   method: string,
   details: any,
+  exchangeRate?: number,
+  convertedAmountNgn?: number,
 ) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) throw new Error("User not authenticated");
+
+  const paymentDetails = { ...details };
+  if (exchangeRate && convertedAmountNgn) {
+    paymentDetails.exchange_rate_used = exchangeRate;
+    paymentDetails.converted_amount_ngn = convertedAmountNgn;
+  }
 
   const { data, error } = await supabase
     .from("withdrawal_requests")
@@ -378,7 +386,7 @@ export async function requestWithdrawal(
         affiliate_id: user.id,
         amount,
         payment_method: method,
-        payment_details: details,
+        payment_details: paymentDetails,
       },
     ])
     .select()
@@ -594,4 +602,15 @@ export async function markNotificationAsRead(id: string) {
     .eq("id", id);
 
   if (error) throw error;
+}
+
+export async function getExchangeRate() {
+  const { data, error } = await supabase
+    .from("settings")
+    .select("value")
+    .eq("key", "usd_to_ngn_rate")
+    .single();
+
+  if (error && error.code !== "PGRST116") throw error;
+  return data ? Number(data.value) : 1250;
 }

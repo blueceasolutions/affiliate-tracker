@@ -5,10 +5,19 @@ export const requestWithdrawalKey = "request-withdrawal";
 export const requestWithdrawalMutation = mutationOptions({
   mutationKey: [requestWithdrawalKey],
   mutationFn: (
-    { amount, method, details }: {
+    { amount, method, details, exchangeRate, convertedAmountNgn }: {
       amount: number;
       method: string;
       details: any;
+      exchangeRate?: number;
+      convertedAmountNgn?: number;
     },
-  ) => requestWithdrawal(amount, method, details),
+  ) =>
+    requestWithdrawal(
+      amount,
+      method,
+      details,
+      exchangeRate,
+      convertedAmountNgn,
+    ),
 });
