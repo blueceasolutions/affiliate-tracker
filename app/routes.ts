@@ -13,6 +13,7 @@ export default [
   route("reset-password", "reset-password.tsx"),
   route("terms", "routes/terms.tsx"),
   route("privacy", "routes/privacy.tsx"),
+  route("how-it-works", "routes/how-it-works.tsx"),
 
   // App / API Routes
   route("ref/:code", "routes/ref.tsx"),

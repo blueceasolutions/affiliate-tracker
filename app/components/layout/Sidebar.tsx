@@ -11,6 +11,7 @@ import {
   LogOut,
   Link as LinkIcon,
   TrendingUp,
+  Lightbulb,
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 
@@ -159,9 +160,16 @@ export function SidebarContent({ onLinkClick }: { onLinkClick?: () => void }) {
           Need help?{' '}
           <a
             href='mailto:hello@bluecea.com'
-            className='text-brand dark:text-brand-light hover:underline'>
+            className='text-brand dark:text-brand-light hover:underline mb-2 block'>
             hello@bluecea.com
           </a>
+          <Link
+            to='/how-it-works'
+            target='_blank'
+            className='inline-flex items-center text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors'>
+            <Lightbulb className='h-3.5 w-3.5 mr-1' />
+            How it works
+          </Link>
         </p>
       </div>
 

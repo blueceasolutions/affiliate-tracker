@@ -74,6 +74,13 @@ export default function Login() {
             className='text-slate-500 dark:text-slate-400 cursor-pointer leading-relaxed'>
             By signing up, you agree to the{' '}
             <Link
+              to='/how-it-works'
+              target='_blank'
+              className='font-medium text-slate-900 dark:text-slate-200 hover:text-slate-700 dark:hover:text-slate-50 transition-colors underline underline-offset-4 mr-1'>
+              How it Works
+            </Link>
+            ,{' '}
+            <Link
               to='/terms'
               target='_blank'
               className='font-medium text-slate-900 dark:text-slate-200 hover:text-slate-700 dark:hover:text-slate-50 transition-colors underline underline-offset-4'>
