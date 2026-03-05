@@ -1,4 +1,12 @@
+import type { Route } from './+types/dashboard-layout'
 import { useEffect, useState } from 'react'
+
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: 'Dashboard | Bluecea Affiliate Program' },
+    { name: 'robots', content: 'noindex, nofollow' },
+  ]
+}
 import { Outlet, useNavigate, useLocation } from 'react-router'
 import { useAuth } from '../../context/AuthContext'
 import { Sidebar } from '../../components/layout/Sidebar'

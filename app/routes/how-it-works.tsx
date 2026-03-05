@@ -1,5 +1,17 @@
+import type { Route } from './+types/how-it-works'
 import { Link } from 'react-router'
 import { ArrowLeft, CheckCircle2, AlertTriangle, Lightbulb } from 'lucide-react'
+
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: 'How It Works | Bluecea Affiliate Program' },
+    {
+      name: 'description',
+      content:
+        'Discover how to join the Bluecea Affiliate Program, share your unique referral link, and earn commissions.',
+    },
+  ]
+}
 
 export default function HowItWorksPage() {
   return (

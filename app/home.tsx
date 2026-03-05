@@ -1,5 +1,17 @@
+import type { Route } from './+types/home'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: 'Sign In | Bluecea Affiliate Program' },
+    {
+      name: 'description',
+      content:
+        'Sign in to your Bluecea Affiliate dashboard to manage your referrals, products, and earnings.',
+    },
+  ]
+}
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Link, useNavigate } from 'react-router'

@@ -10,6 +10,43 @@ import {
 import type { Route } from './+types/root'
 import './app.css'
 
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: 'Bluecea Affiliate Program | Partner & Earn' },
+    {
+      name: 'description',
+      content:
+        'Join the Bluecea Affiliate Program to partner with a leading B2B service provider. Earn competitive commissions by referring clients to our enterprise solutions.',
+    },
+    { name: 'robots', content: 'index, follow' },
+
+    // Open Graph / Facebook
+    { property: 'og:type', content: 'website' },
+    { property: 'og:site_name', content: 'Bluecea' },
+    {
+      property: 'og:title',
+      content: 'Bluecea Affiliate Program | Partner & Earn',
+    },
+    {
+      property: 'og:description',
+      content:
+        'Join the Bluecea Affiliate Program to partner with a leading B2B service provider. Earn competitive commissions by referring clients to our enterprise solutions.',
+    },
+
+    // Twitter
+    { name: 'twitter:card', content: 'summary_large_image' },
+    {
+      name: 'twitter:title',
+      content: 'Bluecea Affiliate Program | Partner & Earn',
+    },
+    {
+      name: 'twitter:description',
+      content:
+        'Join the Bluecea Affiliate Program to partner with a leading B2B service provider. Earn competitive commissions by referring clients to our enterprise solutions.',
+    },
+  ]
+}
+
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
   {
@@ -47,6 +84,20 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
         {/* Must run before any paint — prevents dark-mode flash */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <script
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'Bluecea',
+              url: 'https://affiliate.bluecea.com',
+              logo: 'https://affiliate.bluecea.com/logo.png',
+              description:
+                'Bluecea Affiliate Program partners with leading B2B service providers to offer competitive referral commissions.',
+            }),
+          }}
+        />
       </head>
       <body>
         {children}

@@ -1,5 +1,16 @@
+import type { Route } from './+types/forgot-password'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: 'Forgot Password | Bluecea Affiliate Program' },
+    {
+      name: 'description',
+      content: 'Reset your password for the Bluecea Affiliate Program.',
+    },
+  ]
+}
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Link } from 'react-router'

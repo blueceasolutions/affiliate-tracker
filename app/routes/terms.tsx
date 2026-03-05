@@ -1,5 +1,17 @@
+import type { Route } from './+types/terms'
 import { Link } from 'react-router'
 import { ArrowLeft } from 'lucide-react'
+
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: 'Terms of Service | Bluecea Affiliate Program' },
+    {
+      name: 'description',
+      content:
+        'Read the Terms of Service for the Bluecea Affiliate Program, covering subscriptions, billing, referral commissions, and our refund policy.',
+    },
+  ]
+}
 
 export default function TermsPage() {
   return (

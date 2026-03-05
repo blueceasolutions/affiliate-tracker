@@ -1,5 +1,16 @@
+import type { Route } from './+types/reset-password'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: 'Reset Password | Bluecea Affiliate Program' },
+    {
+      name: 'description',
+      content: 'Set a new password for your Bluecea Affiliate account.',
+    },
+  ]
+}
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { useNavigate } from 'react-router'

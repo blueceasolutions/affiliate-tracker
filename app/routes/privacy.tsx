@@ -1,5 +1,17 @@
+import type { Route } from './+types/privacy'
 import { Link } from 'react-router'
 import { ArrowLeft } from 'lucide-react'
+
+export const meta: Route.MetaFunction = () => {
+  return [
+    { title: 'Privacy Policy | Bluecea Affiliate Program' },
+    {
+      name: 'description',
+      content:
+        'Learn how the Bluecea Affiliate Program handles your data, privacy, and security.',
+    },
+  ]
+}
 
 export default function PrivacyPage() {
   return (
